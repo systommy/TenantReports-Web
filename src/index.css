@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@media print {
+  .no-print { display: none !important; }
+  .print-break { page-break-before: always; }
+  body { font-size: 10pt; }
+  table { font-size: 9pt; }
+  .shadow { box-shadow: none !important; }
+}
