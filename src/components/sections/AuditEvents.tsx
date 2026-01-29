@@ -1,9 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import Section from '../Section'
-import MetricCard from '../MetricCard'
-import Badge from '../Badge'
+import StatusPill from '../common/StatusPill'
 import DataTable from '../tables/DataTable'
-import { statusStyle } from '../../utils/badges'
 import { formatDate } from '../../utils/format'
 import type { AuditEvents as AuditEventsData } from '../../processing/types'
 
@@ -18,7 +15,11 @@ const groupCols: ColumnDef<GroupEvent, unknown>[] = [
   { accessorKey: 'group', header: 'Group' },
   {
     accessorKey: 'status', header: 'Status',
-    cell: ({ getValue }) => <Badge label={String(getValue() ?? '')} style={statusStyle(getValue() as string)} />,
+    cell: ({ getValue }) => {
+        const v = (getValue() as string)?.toLowerCase();
+        const intent = v === 'success' ? 'success' : 'danger';
+        return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
+    },
   },
 ]
 
@@ -29,7 +30,11 @@ const userCols: ColumnDef<UserEvent, unknown>[] = [
   { accessorKey: 'initiated_by', header: 'Initiated By' },
   {
     accessorKey: 'status', header: 'Status',
-    cell: ({ getValue }) => <Badge label={String(getValue() ?? '')} style={statusStyle(getValue() as string)} />,
+    cell: ({ getValue }) => {
+        const v = (getValue() as string)?.toLowerCase();
+        const intent = v === 'success' ? 'success' : 'danger';
+        return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
+    },
   },
 ]
 
@@ -42,44 +47,43 @@ export default function AuditEvents({ data }: { data: AuditEventsData }) {
   ]
 
   return (
-    <Section title="Audit Events" id="audit-events">
+    <div className="space-y-8">
       {topActivities.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {topActivities.map(([key, val]) => (
-            <MetricCard key={key} label={key} value={val} />
+            <div key={key} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                <div className="text-xs font-bold uppercase text-gray-500 mb-1 truncate" title={key}>{key}</div>
+                <div className="text-2xl font-bold text-gray-900">{val}</div>
+            </div>
           ))}
         </div>
       )}
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-3">Group Modifications</h3>
-        <DataTable 
-          columns={groupCols} 
-          data={data.group_events} 
-          renderSubComponent={({ row }) => (
-            <div className="text-sm">
-               <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
-                  {JSON.stringify(row, null, 2)}
-               </pre>
-            </div>
-          )}
-        />
-      </div>
+      
+      <DataTable 
+        title="Group Modifications"
+        columns={groupCols} 
+        data={data.group_events} 
+        renderSubComponent={({ row }) => (
+          <div className="text-sm">
+             <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
+                {JSON.stringify(row, null, 2)}
+             </pre>
+          </div>
+        )}
+      />
 
-      <div>
-        <h3 className="text-lg font-semibold mb-3">User Modifications</h3>
-        <DataTable 
-          columns={userCols} 
-          data={data.user_events} 
-          renderSubComponent={({ row }) => (
-            <div className="text-sm">
-               <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
-                  {JSON.stringify(row, null, 2)}
-               </pre>
-            </div>
-          )}
-        />
-      </div>
-
-    </Section>
+      <DataTable 
+        title="User Modifications"
+        columns={userCols} 
+        data={data.user_events} 
+        renderSubComponent={({ row }) => (
+          <div className="text-sm">
+             <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
+                {JSON.stringify(row, null, 2)}
+             </pre>
+          </div>
+        )}
+      />
+    </div>
   )
 }

@@ -11,6 +11,7 @@ import {
   type SortingState,
   type ExpandedState,
 } from '@tanstack/react-table'
+import { ChevronRight, ChevronDown, Search, ArrowUpDown, ChevronLeft } from 'lucide-react'
 
 interface Props<T> {
   columns: ColumnDef<T, unknown>[]
@@ -19,6 +20,8 @@ interface Props<T> {
   filterPlaceholder?: string
   renderSubComponent?: (props: { row: T }) => ReactNode
   getRowCanExpand?: (row: T) => boolean
+  title?: string
+  actions?: ReactNode
 }
 
 export default function DataTable<T>({ 
@@ -27,7 +30,9 @@ export default function DataTable<T>({
   pageSize = 10, 
   filterPlaceholder = 'Search...',
   renderSubComponent,
-  getRowCanExpand
+  getRowCanExpand,
+  title,
+  actions
 }: Props<T>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -50,35 +55,49 @@ export default function DataTable<T>({
   })
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-      {data.length > pageSize && (
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-          <input
-            type="text"
-            value={globalFilter}
-            onChange={e => setGlobalFilter(e.target.value)}
-            placeholder={filterPlaceholder}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm w-full max-w-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-          />
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+      {/* Header Bar: Title + Search + Actions */}
+      <div className="px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
+        <div className="flex-1">
+          {title && <h3 className="font-bold text-gray-900 text-sm">{title}</h3>}
         </div>
-      )}
+        
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative group w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" size={14} />
+            <input 
+              type="text" 
+              value={globalFilter}
+              onChange={e => setGlobalFilter(e.target.value)}
+              placeholder={filterPlaceholder}
+              className="pl-9 pr-4 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm w-full focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 outline-none transition-all"
+            />
+          </div>
+          {actions}
+        </div>
+      </div>
+
       <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-50">
+        <table className="min-w-full text-sm text-left">
+          <thead className="bg-gray-50/80 border-b border-gray-100">
             {table.getHeaderGroups().map(hg => (
-              <tr key={hg.id} className="border-b border-gray-200">
+              <tr key={hg.id}>
                 {hg.headers.map(header => (
                   <th
                     key={header.id}
                     onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
-                    className={`px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider ${
-                      header.column.getCanSort() ? 'cursor-pointer select-none hover:text-gray-700 hover:bg-gray-100 transition-colors' : ''
+                    className={`px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider ${
+                      header.column.getCanSort() ? 'cursor-pointer select-none hover:text-indigo-600 transition-colors' : ''
                     }`}
+                    style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
                   >
                     <div className="flex items-center gap-1">
                       {flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.column.getCanSort() && !header.column.getIsSorted() && (
+                        <ArrowUpDown size={12} className="opacity-0 group-hover:opacity-30" />
+                      )}
                       {header.column.getIsSorted() && (
-                        <span className="text-gray-400">
+                        <span className="text-indigo-500">
                           {{ asc: ' ▲', desc: ' ▼' }[header.column.getIsSorted() as string]}
                         </span>
                       )}
@@ -88,19 +107,19 @@ export default function DataTable<T>({
               </tr>
             ))}
           </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-50 bg-white">
             {table.getRowModel().rows.map(row => (
               <Fragment key={row.id}>
-                <tr className="hover:bg-blue-50/30 transition-colors group">
+                <tr className="hover:bg-gray-50/80 transition-colors group">
                   {row.getVisibleCells().map((cell, idx) => (
-                    <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-gray-700">
+                    <td key={cell.id} className="px-6 py-3 whitespace-nowrap text-gray-700">
                       <div className="flex items-center gap-2">
                         {idx === 0 && row.getCanExpand() && (
                           <button
                             onClick={row.getToggleExpandedHandler()}
-                            className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors"
+                            className="p-0.5 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors"
                           >
-                            {row.getIsExpanded() ? '▼' : '▶'}
+                            {row.getIsExpanded() ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                           </button>
                         )}
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -109,36 +128,45 @@ export default function DataTable<T>({
                   ))}
                 </tr>
                 {row.getIsExpanded() && renderSubComponent && (
-                  <tr className="bg-gray-50/50">
-                    <td colSpan={row.getVisibleCells().length} className="px-6 py-4">
-                      {renderSubComponent({ row: row.original })}
+                  <tr className="bg-gray-50/30">
+                    <td colSpan={row.getVisibleCells().length} className="px-6 py-4 relative">
+                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
+                       {renderSubComponent({ row: row.original })}
                     </td>
                   </tr>
                 )}
               </Fragment>
             ))}
+            {data.length === 0 && (
+                <tr>
+                    <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500 italic">
+                        No results found.
+                    </td>
+                </tr>
+            )}
           </tbody>
         </table>
       </div>
+      
       {table.getPageCount() > 1 && (
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50">
-          <div className="text-sm text-gray-500">
+        <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100 bg-gray-50/50">
+          <div className="text-xs text-gray-500">
             Page <span className="font-medium text-gray-900">{table.getState().pagination.pageIndex + 1}</span> of <span className="font-medium text-gray-900">{table.getPageCount()}</span>
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="px-3 py-1 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-1 border border-gray-200 rounded bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Previous
+              <ChevronLeft size={16} />
             </button>
             <button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="px-3 py-1 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-1 border border-gray-200 rounded bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Next
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>

@@ -28,9 +28,9 @@ export function boolLabel(flag: unknown): string {
 }
 
 export const badgeClasses: Record<BadgeStyle, string> = {
-  success: 'bg-green-100 text-green-800',
-  danger: 'bg-red-100 text-red-800',
-  warning: 'bg-yellow-100 text-yellow-800',
-  info: 'bg-blue-100 text-blue-800',
-  neutral: 'bg-gray-100 text-gray-800',
+  success: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+  danger: 'bg-rose-50 text-rose-700 border border-rose-100',
+  warning: 'bg-amber-50 text-amber-700 border border-amber-100',
+  info: 'bg-indigo-50 text-indigo-700 border border-indigo-100',
+  neutral: 'bg-gray-100 text-gray-700 border border-gray-200',
 }

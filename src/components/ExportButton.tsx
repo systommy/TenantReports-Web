@@ -7,7 +7,7 @@ export default function ExportButton({ report }: { report: ProcessedReport }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const filename = `SecurityReport_${report.tenant.organization_name.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}`
+  const filename = `TenantReport_${report.tenant.organization_name.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}`
 
   const handlePdf = async () => {
     setLoading(true)
@@ -26,7 +26,7 @@ export default function ExportButton({ report }: { report: ProcessedReport }) {
   const handleHtml = () => {
     setOpen(false)
     try {
-      exportHtml('report-content', `${filename}.html`, `Security Report - ${report.tenant.organization_name}`)
+      exportHtml('report-content', `${filename}.html`, `${report.tenant.organization_name} - Tenant Report`)
     } catch (err) {
       console.error(err)
       alert('Failed to export HTML')

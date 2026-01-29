@@ -1,9 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import Section from '../Section'
-import MetricCard from '../MetricCard'
-import Badge from '../Badge'
 import DataTable from '../tables/DataTable'
-import { severityStyle } from '../../utils/badges'
+import StatusPill from '../common/StatusPill'
 import { formatDate } from '../../utils/format'
 import type { DefenderSummary as DefenderSummaryData } from '../../processing/types'
 
@@ -13,7 +10,11 @@ const columns: ColumnDef<Threat, unknown>[] = [
   { accessorKey: 'name', header: 'Name' },
   {
     accessorKey: 'severity', header: 'Severity',
-    cell: ({ getValue }) => <Badge label={String(getValue() ?? '')} style={severityStyle(getValue() as string)} />,
+    cell: ({ getValue }) => {
+        const v = (getValue() as string)?.toLowerCase();
+        const intent = v === 'high' ? 'danger' : v === 'medium' ? 'warning' : 'info';
+        return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
+    },
   },
   { accessorKey: 'category', header: 'Category' },
   { accessorKey: 'detected', header: 'Detected', cell: ({ getValue }) => formatDate(getValue() as string) },
@@ -25,26 +26,31 @@ export default function DefenderSummary({ data }: { data: DefenderSummaryData })
   const summaryEntries = Object.entries(data.summary)
 
   return (
-    <Section title="Defender Summary" id="defender-summary">
+    <div className="space-y-6">
       {summaryEntries.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {summaryEntries.map(([key, val]) => (
-            <MetricCard key={key} label={key} value={String(val ?? '')} />
+            <div key={key} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                <div className="text-sm font-medium text-gray-500 mb-1">{key}</div>
+                <div className="text-2xl font-bold text-gray-900">{String(val ?? '')}</div>
+            </div>
           ))}
         </div>
       )}
+      
       <DataTable 
+        title="Defender Threats"
         columns={columns} 
         data={data.threats} 
+        pageSize={5}
         renderSubComponent={({ row }) => (
           <div className="text-sm">
-             <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
+             <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto font-mono">
                 {JSON.stringify(row, null, 2)}
              </pre>
           </div>
         )}
       />
-
-    </Section>
+    </div>
   )
 }

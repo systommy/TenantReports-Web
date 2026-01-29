@@ -1,6 +1,4 @@
 import { useMemo } from 'react'
-import Section from '../Section'
-import MetricCard from '../MetricCard'
 import BarChart from '../charts/BarChart'
 import { pct } from '../../utils/format'
 import type { MfaCoverage as MfaCoverageData } from '../../processing/types'
@@ -12,20 +10,31 @@ export default function MfaCoverage({ data }: { data: MfaCoverageData }) {
   }, [data.methods])
 
   return (
-    <Section title="MFA Coverage" id="mfa-coverage">
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <MetricCard label="Adoption Rate" value={pct(data.adoption_rate)} />
-        <MetricCard label="Registered Users" value={data.mfa_registered} />
-        <MetricCard label="Total Users" value={data.total_users} />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">Adoption Rate</div>
+            <div className="text-2xl font-bold text-gray-900">{pct(data.adoption_rate)}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">Registered Users</div>
+            <div className="text-2xl font-bold text-gray-900">{data.mfa_registered}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">Total Users</div>
+            <div className="text-2xl font-bold text-gray-900">{data.total_users}</div>
+        </div>
       </div>
       {methods.labels.length > 0 && (
-        <BarChart
-          labels={methods.labels}
-          datasets={[{ label: 'Count', values: methods.values }]}
-          title="MFA Methods"
-          horizontal
-        />
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <BarChart
+            labels={methods.labels}
+            datasets={[{ label: 'Count', values: methods.values }]}
+            title="MFA Methods"
+            horizontal
+            />
+        </div>
       )}
-    </Section>
+    </div>
   )
 }

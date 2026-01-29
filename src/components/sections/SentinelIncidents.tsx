@@ -1,10 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import Section from '../Section'
-import MetricCard from '../MetricCard'
-import Badge from '../Badge'
+import StatusPill from '../common/StatusPill'
 import DataTable from '../tables/DataTable'
 import BarChart from '../charts/BarChart'
-import { severityStyle, statusStyle } from '../../utils/badges'
 import { formatDate } from '../../utils/format'
 import type { SentinelIncidents as SentinelIncidentsData } from '../../processing/types'
 
@@ -16,29 +13,38 @@ const columns: ColumnDef<Incident, unknown>[] = [
   { accessorKey: 'title', header: 'Title' },
   {
     accessorKey: 'severity', header: 'Severity',
-    cell: ({ getValue }) => <Badge label={String(getValue() ?? '')} style={severityStyle(getValue() as string)} />,
+    cell: ({ getValue }) => {
+        const v = (getValue() as string)?.toLowerCase();
+        const intent = v === 'high' ? 'danger' : v === 'medium' ? 'warning' : 'info';
+        return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
+    },
   },
   {
     accessorKey: 'status', header: 'Status',
-    cell: ({ getValue }) => <Badge label={String(getValue() ?? '')} style={statusStyle(getValue() as string)} />,
+    cell: ({ getValue }) => {
+        const v = (getValue() as string)?.toLowerCase();
+        const intent = v === 'new' ? 'danger' : v === 'active' ? 'warning' : 'neutral';
+        return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
+    },
   },
   { accessorKey: 'classification', header: 'Classification' },
-  { accessorKey: 'comments', header: 'Comments' },
 ]
 
 export default function SentinelIncidents({ data }: { data: SentinelIncidentsData }) {
   if (data.total === 0) return null
 
   return (
-    <Section title="Sentinel Incidents" id="sentinel-incidents">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <MetricCard label="Total Incidents" value={data.total} />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <BarChart labels={Object.keys(data.by_severity)} datasets={[{ label: 'Incidents', values: Object.values(data.by_severity) }]} title="By Severity" />
-        <BarChart labels={Object.keys(data.by_status)} datasets={[{ label: 'Incidents', values: Object.values(data.by_status) }]} title="By Status" />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+             <BarChart labels={Object.keys(data.by_severity)} datasets={[{ label: 'Incidents', values: Object.values(data.by_severity) }]} title="By Severity" />
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+             <BarChart labels={Object.keys(data.by_status)} datasets={[{ label: 'Incidents', values: Object.values(data.by_status) }]} title="By Status" />
+        </div>
       </div>
       <DataTable 
+        title="Incident List"
         columns={columns} 
         data={data.incidents} 
         renderSubComponent={({ row }) => (
@@ -56,6 +62,6 @@ export default function SentinelIncidents({ data }: { data: SentinelIncidentsDat
           </div>
         )}
       />
-    </Section>
+    </div>
   )
 }

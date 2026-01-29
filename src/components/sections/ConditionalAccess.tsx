@@ -1,9 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import Section from '../Section'
-import MetricCard from '../MetricCard'
-import Badge from '../Badge'
 import DataTable from '../tables/DataTable'
-import { statusStyle, boolStyle, boolLabel } from '../../utils/badges'
+import StatusPill from '../common/StatusPill'
 import { formatDate } from '../../utils/format'
 import type { ConditionalAccess as ConditionalAccessData, ConditionalAccessPolicy } from '../../processing/types'
 
@@ -21,32 +18,49 @@ export default function ConditionalAccess({ data }: { data: ConditionalAccessDat
     { accessorKey: 'name', header: 'Name' },
     {
       accessorKey: 'state', header: 'State',
-      cell: ({ getValue }) => <Badge label={String(getValue() ?? '')} style={statusStyle(getValue() as string)} />,
+      cell: ({ getValue }) => {
+        const v = (getValue() as string)?.toLowerCase();
+        const intent = v === 'enabled' ? 'success' : v === 'disabled' ? 'neutral' : 'warning';
+        return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
+      },
     },
     {
       accessorKey: 'requires_mfa', header: 'Requires MFA',
-      cell: ({ getValue }) => <Badge label={boolLabel(getValue())} style={boolStyle(getValue())} />,
+      cell: ({ getValue }) => <StatusPill label={getValue() ? 'Yes' : 'No'} intent={getValue() ? 'success' : 'neutral'} />,
     },
     {
       accessorKey: 'blocks_access', header: 'Blocks Access',
-      cell: ({ getValue }) => <Badge label={boolLabel(getValue())} style={boolStyle(getValue())} />,
+      cell: ({ getValue }) => <StatusPill label={getValue() ? 'Yes' : 'No'} intent={getValue() ? 'danger' : 'neutral'} />,
     },
     {
       accessorKey: 'covers_all_users', header: 'Covers All Users',
-      cell: ({ getValue }) => <Badge label={boolLabel(getValue())} style={boolStyle(getValue())} />,
+      cell: ({ getValue }) => <StatusPill label={getValue() ? 'Yes' : 'No'} intent={getValue() ? 'info' : 'neutral'} />,
     },
     { accessorKey: 'created_date', header: 'Created', cell: ({ getValue }) => formatDate(getValue() as string) },
   ]
 
   return (
-    <Section title="Conditional Access Policies" id="conditional-access">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <MetricCard label="Total Policies" value={summary.total_policies} />
-        <MetricCard label="Enabled" value={summary.enabled} />
-        <MetricCard label="Disabled" value={summary.disabled} />
-        <MetricCard label="Report Only" value={summary.report_only} />
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">Total Policies</div>
+            <div className="text-2xl font-bold text-gray-900">{summary.total_policies}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">Enabled</div>
+            <div className="text-2xl font-bold text-emerald-600">{summary.enabled}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">Disabled</div>
+            <div className="text-2xl font-bold text-gray-400">{summary.disabled}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">Report Only</div>
+            <div className="text-2xl font-bold text-amber-500">{summary.report_only}</div>
+        </div>
       </div>
       <DataTable 
+        title="Policy List"
         columns={columns} 
         data={data.policies} 
         renderSubComponent={({ row }) => (
@@ -88,13 +102,13 @@ export default function ConditionalAccess({ data }: { data: ConditionalAccessDat
 
             <div className="pt-4 border-t border-gray-100">
                 <span className="font-semibold text-gray-500 text-xs uppercase block mb-2">Full Policy Object</span>
-                <pre className="bg-gray-100 p-3 rounded-lg text-xs overflow-x-auto max-h-60">
+                <pre className="bg-gray-100 p-3 rounded-lg text-xs overflow-x-auto max-h-60 font-mono">
                   {JSON.stringify(row, null, 2)}
                 </pre>
             </div>
           </div>
         )}
       />
-    </Section>
+    </div>
   )
 }

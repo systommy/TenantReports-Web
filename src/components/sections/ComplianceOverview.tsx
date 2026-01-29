@@ -1,26 +1,25 @@
 import { useMemo } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
-import Section from '../Section'
-import Badge from '../Badge'
 import DataTable from '../tables/DataTable'
+import StatusPill from '../common/StatusPill'
 import DoughnutChart from '../charts/DoughnutChart'
-import { statusStyle } from '../../utils/badges'
 import { formatDate } from '../../utils/format'
 import type { ComplianceOverview as ComplianceOverviewData } from '../../processing/types'
 
 const columns: ColumnDef<Record<string, unknown>, unknown>[] = [
-  { accessorKey: 'DeviceName', header: 'DeviceName' },
-  { accessorKey: 'OperatingSystem', header: 'OperatingSystem' },
+  { accessorKey: 'DeviceName', header: 'Device Name' },
+  { accessorKey: 'OperatingSystem', header: 'OS' },
   {
-    accessorKey: 'ComplianceState', header: 'ComplianceState',
+    accessorKey: 'ComplianceState', header: 'Status',
     cell: ({ getValue }) => {
-      const v = getValue() as string
-      return <Badge label={v ?? ''} style={statusStyle(v)} />
+      const v = (getValue() as string) ?? '';
+      const intent = v.toLowerCase() === 'compliant' ? 'success' : 'danger';
+      return <StatusPill label={v} intent={intent} />;
     },
   },
-  { accessorKey: 'OwnerType', header: 'OwnerType' },
+  { accessorKey: 'OwnerType', header: 'Owner' },
   {
-    accessorKey: 'LastSyncDateTime', header: 'LastSyncDateTime',
+    accessorKey: 'LastSyncDateTime', header: 'Last Sync',
     cell: ({ getValue }) => formatDate(getValue() as string),
   },
 ]
@@ -43,26 +42,36 @@ export default function ComplianceOverview({ data, devices }: { data: Compliance
   if (isEmpty) return null
 
   return (
-    <Section title="Compliance Overview" id="compliance-overview">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <DoughnutChart labels={Object.keys(compliance)} values={Object.values(compliance)} title="Compliance Status" />
-        <DoughnutChart labels={Object.keys(os)} values={Object.values(os)} title="OS Distribution" />
-        <DoughnutChart labels={Object.keys(ownership)} values={Object.values(ownership)} title="Ownership" />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <h3 className="font-bold text-gray-900 text-sm mb-4">Compliance Status</h3>
+            <DoughnutChart labels={Object.keys(compliance)} values={Object.values(compliance)} title="" />
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <h3 className="font-bold text-gray-900 text-sm mb-4">OS Distribution</h3>
+            <DoughnutChart labels={Object.keys(os)} values={Object.values(os)} title="" />
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <h3 className="font-bold text-gray-900 text-sm mb-4">Ownership</h3>
+            <DoughnutChart labels={Object.keys(ownership)} values={Object.values(ownership)} title="" />
+        </div>
       </div>
       <DataTable 
+        title="Managed Devices"
         columns={columns} 
         data={devices} 
         renderSubComponent={({ row }) => (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
             {Object.entries(row).map(([k, v]) => (
               <div key={k} className="flex flex-col">
-                <span className="font-semibold text-gray-500 text-xs uppercase">{k}</span>
-                <span className="break-all">{String(v ?? '-')}</span>
+                <span className="font-semibold text-gray-400 text-xs uppercase">{k}</span>
+                <span className="break-all font-mono text-xs">{String(v ?? '-')}</span>
               </div>
             ))}
           </div>
         )}
       />
-    </Section>
+    </div>
   )
 }

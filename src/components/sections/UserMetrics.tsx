@@ -1,82 +1,97 @@
-import { useState, useMemo } from 'react'
-import type { ColumnDef } from '@tanstack/react-table'
-import Section from '../Section'
-import MetricCard from '../MetricCard'
-import Badge from '../Badge'
-import DataTable from '../tables/DataTable'
-import { boolStyle, boolLabel } from '../../utils/badges'
-import type { UsersSummary } from '../../processing/types'
+import { useState, useMemo } from 'react';
+import type { ColumnDef } from '@tanstack/react-table';
+import DataTable from '../tables/DataTable';
+import StatusPill from '../common/StatusPill';
+import { Users, UserCheck, UserX, Shield } from 'lucide-react';
 
-const columns: ColumnDef<Record<string, unknown>, unknown>[] = [
-  { accessorKey: 'DisplayName', header: 'DisplayName' },
-  { accessorKey: 'UserPrincipalName', header: 'UserPrincipalName' },
+interface UserMetricsProps {
+  data: any;
+  details: any[];
+}
+
+const columns: ColumnDef<any, unknown>[] = [
+  { accessorKey: 'DisplayName', header: 'Display Name' },
+  { accessorKey: 'UserPrincipalName', header: 'UPN' },
   {
-    accessorKey: 'AccountEnabled', header: 'AccountEnabled',
-    cell: ({ getValue }) => <Badge label={boolLabel(getValue())} style={boolStyle(getValue())} />,
+    accessorKey: 'AccountEnabled',
+    header: 'Status',
+    cell: ({ getValue }) => (
+      <StatusPill 
+        label={getValue() ? 'Enabled' : 'Disabled'} 
+        intent={getValue() ? 'success' : 'neutral'} 
+      />
+    ),
   },
-  { accessorKey: 'UserType', header: 'UserType' },
+  { accessorKey: 'UserType', header: 'Type' },
   {
-    accessorKey: 'IsLicensed', header: 'IsLicensed',
-    cell: ({ getValue }) => <Badge label={boolLabel(getValue())} style={boolStyle(getValue())} />,
+    accessorKey: 'IsLicensed',
+    header: 'License',
+    cell: ({ getValue }) => (
+      <StatusPill 
+        label={getValue() ? 'Licensed' : 'Unlicensed'} 
+        intent={getValue() ? 'info' : 'warning'} 
+      />
+    ),
   },
   { accessorKey: 'City', header: 'City' },
-]
+];
 
-export default function UserMetrics({ data, details }: { data: UsersSummary; details: Record<string, unknown>[] }) {
-  const [filter, setFilter] = useState<string | null>(null)
+export default function UserMetrics({ data, details }: UserMetricsProps) {
+  const [filter, setFilter] = useState<string | null>(null);
 
-  const cards = [
-    { label: 'Total', value: data.total, key: null },
-    { label: 'Enabled', value: data.enabled, key: 'AccountEnabled=true' },
-    { label: 'Disabled', value: data.disabled, key: 'AccountEnabled=false' },
-    { label: 'Licensed', value: data.licensed, key: 'IsLicensed=true' },
-    { label: 'Unlicensed', value: data.unlicensed, key: 'IsLicensed=false' },
-    { label: 'Guest', value: data.guest, key: 'UserType=Guest' },
-    { label: 'Admin', value: data.admin, key: 'IsAdmin=true' },
-    { label: 'MFA Registered', value: data.mfa_registered, key: 'MfaRegistered=true' },
-    { label: 'MFA Not Registered', value: data.mfa_not_registered, key: 'MfaRegistered=false' },
-    { label: 'Inactive', value: data.inactive, key: 'IsInactive=true' },
-  ]
+  const filters = [
+    { label: 'All Users', count: data.total, key: null, icon: Users },
+    { label: 'Admins', count: data.admin, key: 'IsAdmin=true', icon: Shield },
+    { label: 'Enabled', count: data.enabled, key: 'AccountEnabled=true', icon: UserCheck },
+    { label: 'Disabled', count: data.disabled, key: 'AccountEnabled=false', icon: UserX },
+    { label: 'Guests', count: data.guest, key: 'UserType=Guest', icon: Users },
+  ];
 
   const filteredDetails = useMemo(() => {
-    if (!filter) return details
-    const [key, valStr] = filter.split('=')
-    const val = valStr === 'true' ? true : valStr === 'false' ? false : valStr
-    
-    return details.filter(u => {
-      // In a real scenario, we might need stricter type checking or property existence checks
-      return u[key] === val
-    })
-  }, [details, filter])
+    if (!filter) return details;
+    const [key, valStr] = filter.split('=');
+    const val = valStr === 'true' ? true : valStr === 'false' ? false : valStr;
+    return details.filter((u) => u[key] === val);
+  }, [details, filter]);
 
   return (
-    <Section title="User Metrics" id="user-metrics">
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        {cards.map(c => (
-          <MetricCard 
-            key={c.label}
-            label={c.label} 
-            value={c.value} 
-            isActive={filter === c.key}
-            onClick={() => setFilter(filter === c.key ? null : c.key)}
-            className="cursor-pointer"
-          />
+    <div className="space-y-4">
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {filters.map((f) => (
+          <button
+            key={f.label}
+            onClick={() => setFilter(filter === f.key ? null : f.key)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors whitespace-nowrap ${
+              filter === f.key
+                ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <f.icon size={16} />
+            {f.label}
+            <span className="bg-gray-100 px-1.5 py-0.5 rounded-full text-xs text-gray-600 ml-1">
+              {f.count}
+            </span>
+          </button>
         ))}
       </div>
-      <DataTable 
-        columns={columns} 
-        data={filteredDetails} 
+
+      <DataTable
+        title={filter ? `Users: ${filters.find(f => f.key === filter)?.label}` : 'Full User Directory'}
+        columns={columns}
+        data={filteredDetails}
+        pageSize={10}
         renderSubComponent={({ row }) => (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs text-gray-600">
             {Object.entries(row).map(([k, v]) => (
               <div key={k} className="flex flex-col">
-                <span className="font-semibold text-gray-500 text-xs uppercase">{k}</span>
-                <span className="break-all">{String(v ?? '-')}</span>
+                <span className="font-semibold text-gray-400 uppercase tracking-wider">{k}</span>
+                <span className="break-all font-mono">{String(v ?? '-')}</span>
               </div>
             ))}
           </div>
         )}
       />
-    </Section>
-  )
+    </div>
+  );
 }

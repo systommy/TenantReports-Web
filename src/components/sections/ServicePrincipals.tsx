@@ -1,9 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import Section from '../Section'
-import MetricCard from '../MetricCard'
-import Badge from '../Badge'
 import DataTable from '../tables/DataTable'
-import { severityStyle } from '../../utils/badges'
+import StatusPill from '../common/StatusPill'
 import type { ServicePrincipals as ServicePrincipalsData, ServicePrincipalApp } from '../../processing/types'
 
 export default function ServicePrincipals({ data }: { data: ServicePrincipalsData }) {
@@ -13,7 +10,11 @@ export default function ServicePrincipals({ data }: { data: ServicePrincipalsDat
     { accessorKey: 'name', header: 'Application Name' },
     {
       accessorKey: 'risk_level', header: 'Risk Level',
-      cell: ({ getValue }) => <Badge label={String(getValue() ?? '')} style={severityStyle(getValue() as string)} />,
+      cell: ({ getValue }) => {
+        const v = (getValue() as string)?.toLowerCase();
+        const intent = v === 'high' ? 'danger' : v === 'medium' ? 'warning' : 'info';
+        return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
+      },
     },
     { accessorKey: 'consent_type', header: 'Consent Type' },
     { accessorKey: 'principal', header: 'Principal' },
@@ -24,14 +25,27 @@ export default function ServicePrincipals({ data }: { data: ServicePrincipalsDat
   ]
 
   return (
-    <Section title="Service Principals" id="service-principals">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <MetricCard label="Critical" value={data.summary.critical} className="text-red-600" />
-        <MetricCard label="High" value={data.summary.high} />
-        <MetricCard label="Medium" value={data.summary.medium} />
-        <MetricCard label="Low" value={data.summary.low} />
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">Critical</div>
+            <div className="text-2xl font-bold text-rose-600">{data.summary.critical}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">High</div>
+            <div className="text-2xl font-bold text-amber-600">{data.summary.high}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">Medium</div>
+            <div className="text-2xl font-bold text-yellow-600">{data.summary.medium}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+            <div className="text-sm font-medium text-gray-500 mb-1">Low</div>
+            <div className="text-2xl font-bold text-blue-600">{data.summary.low}</div>
+        </div>
       </div>
       <DataTable 
+        title="Application Permissions"
         columns={columns} 
         data={data.all_apps} 
         renderSubComponent={({ row }) => (
@@ -44,7 +58,10 @@ export default function ServicePrincipals({ data }: { data: ServicePrincipalsDat
                      <div><span className="text-xs text-gray-500 uppercase">Permission:</span> {p.permission}</div>
                      <div><span className="text-xs text-gray-500 uppercase">Resource:</span> {p.resource}</div>
                      <div><span className="text-xs text-gray-500 uppercase">Type:</span> {p.consent_type}</div>
-                     <div><span className="text-xs text-gray-500 uppercase">Risk:</span> <Badge label={p.risk_level ?? ''} style={p.risk_level === 'High' ? 'danger' : 'neutral'} /></div>
+                     <div>
+                        <span className="text-xs text-gray-500 uppercase block mb-1">Risk:</span> 
+                        <StatusPill label={p.risk_level ?? ''} intent={p.risk_level === 'High' ? 'danger' : 'neutral'} />
+                     </div>
                   </div>
                 ))}
               </div>
@@ -54,6 +71,6 @@ export default function ServicePrincipals({ data }: { data: ServicePrincipalsDat
           </div>
         )}
       />
-    </Section>
+    </div>
   )
 }
