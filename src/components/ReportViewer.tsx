@@ -26,7 +26,7 @@ export default function ReportViewer({ rawData, onReset }: { rawData: Record<str
       case 'compliance':
         return <ComplianceTab data={report} />
       case 'licensing':
-        return <LicenseOverview data={report.licenses} />
+        return <LicenseOverview data={report.licenses} changes={report.licenseChanges} />
       case 'audit':
         return <AuditTab data={report} />
       default:

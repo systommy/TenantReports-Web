@@ -14,24 +14,27 @@ interface Props {
 
 export default function BarChart({ labels, datasets, title, horizontal = false }: Props) {
   return (
-    <div>
+    <div className="w-full h-full flex flex-col">
       {title && <h3 className="text-sm font-medium text-gray-600 text-center mb-2">{title}</h3>}
-      <Bar
-        data={{
-          labels,
-          datasets: datasets.map((ds, i) => ({
-            label: ds.label,
-            data: ds.values,
-            backgroundColor: COLORS[i % COLORS.length],
-          })),
-        }}
-        options={{
-          responsive: true,
-          indexAxis: horizontal ? 'y' : 'x',
-          plugins: { legend: { display: datasets.length > 1, position: 'bottom' } },
-          scales: { y: { beginAtZero: true } },
-        }}
-      />
+      <div className="flex-1 min-h-0 relative">
+        <Bar
+          data={{
+            labels,
+            datasets: datasets.map((ds, i) => ({
+              label: ds.label,
+              data: ds.values,
+              backgroundColor: COLORS[i % COLORS.length],
+            })),
+          }}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: horizontal ? 'y' : 'x',
+            plugins: { legend: { display: datasets.length > 1, position: 'bottom' } },
+            scales: { y: { beginAtZero: true } },
+          }}
+        />
+      </div>
     </div>
   )
 }

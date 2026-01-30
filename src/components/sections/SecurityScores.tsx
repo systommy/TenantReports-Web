@@ -1,7 +1,9 @@
 import { useMemo } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
+import { Activity } from 'lucide-react'
 import StatusPill from '../common/StatusPill'
 import DataTable from '../tables/DataTable'
+import LineChart from '../charts/LineChart'
 import { pct } from '../../utils/format'
 import type { SecurityScores as SecurityScoresData, ControlScore, AzureSubscription } from '../../processing/types'
 
@@ -32,16 +34,46 @@ const azureColumns: ColumnDef<AzureSubscription, unknown>[] = [
   },
 ]
 
-export default function SecurityScores({ data }: { data: SecurityScoresData }) {
+interface Props {
+    data: SecurityScoresData;
+    historyLabels: string[];
+    historyValues: number[];
+}
+
+export default function SecurityScores({ data, historyLabels, historyValues }: Props) {
   const sortedControls = useMemo(
     () => [...data.control_scores].sort((a, b) => b.score_gap - a.score_gap),
     [data.control_scores],
   )
   
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       {/* MS365 Section */}
-      <div className="space-y-4">
+      <div id="ms365-secure-score" className="space-y-6">
+        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">MS365 Secure Score</h3>
+        
+        {/* Security Trends Chart */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+                <div>
+                    <h4 className="font-bold text-gray-900">Security Trends</h4>
+                    <p className="text-sm text-gray-500">Score performance over time</p>
+                </div>
+            </div>
+            <div className="w-full h-64">
+                {historyLabels.length > 0 ? (
+                    <LineChart labels={historyLabels} values={historyValues} label="Secure Score" title="" />
+                ) : (
+                    <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200 text-gray-400">
+                        <div className="text-center">
+                            <Activity size={32} className="mx-auto mb-2 opacity-50" />
+                            <span className="text-sm font-medium">No history data available</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+
         <DataTable 
             title="Top Recommendations (by Score Gap)"
             columns={controlColumns} 
@@ -51,15 +83,16 @@ export default function SecurityScores({ data }: { data: SecurityScoresData }) {
       </div>
 
       {/* Azure Section */}
-      <div className="space-y-4">
-        {data.azure_subscriptions.length > 0 && (
-          <DataTable 
-            title="Azure Security Scores"
-            columns={azureColumns} 
-            data={data.azure_subscriptions} 
-          />
-        )}
-      </div>
+      {data.azure_subscriptions.length > 0 && (
+        <div id="azure-secure-score" className="space-y-6">
+            <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Azure Secure Score</h3>
+            <DataTable 
+                title="Azure Subscriptions"
+                columns={azureColumns} 
+                data={data.azure_subscriptions} 
+            />
+        </div>
+      )}
     </div>
   )
 }

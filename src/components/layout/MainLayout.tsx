@@ -37,6 +37,12 @@ export default function MainLayout({
         
         <div className="flex-1 overflow-y-auto">
           {children}
+          
+          <footer className="mt-8 py-6 border-t border-gray-200 text-center">
+            <p className="text-sm text-gray-500">
+              &copy; {new Date().getFullYear()} <a href="https://systom.dev" target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors">Tom de Leeuw - systom.dev</a>. All rights reserved.
+            </p>
+          </footer>
         </div>
       </main>
     </div>

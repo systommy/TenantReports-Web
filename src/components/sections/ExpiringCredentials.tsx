@@ -29,7 +29,14 @@ const columns: ColumnDef<Credential, unknown>[] = [
 ]
 
 export default function ExpiringCredentials({ credentials }: { credentials: ServicePrincipals['expiring_credentials'] }) {
-  if (!credentials || credentials.length === 0) return null
+  if (!credentials || credentials.length === 0) {
+    return (
+      <div className="bg-gray-50 rounded-xl border border-dashed border-gray-200 p-8 text-center">
+        <div className="text-gray-500 font-medium">No expiring credentials found</div>
+        <div className="text-xs text-gray-400 mt-1">No service principal credentials are expiring soon.</div>
+      </div>
+    )
+  }
 
   return (
     <DataTable 

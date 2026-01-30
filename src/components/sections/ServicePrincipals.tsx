@@ -1,7 +1,22 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import DataTable from '../tables/DataTable'
 import StatusPill from '../common/StatusPill'
+import { AlertTriangle, ShieldAlert, Shield, Info } from 'lucide-react'
 import type { ServicePrincipals as ServicePrincipalsData, ServicePrincipalApp } from '../../processing/types'
+
+function MetricCard({ title, value, colorClass, bgClass, icon: Icon }: { title: string; value: number | string; colorClass: string; bgClass: string; icon: any }) {
+    return (
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex items-start justify-between group hover:border-indigo-200 transition-colors">
+            <div>
+                <div className="text-sm font-medium text-gray-500 mb-1">{title}</div>
+                <div className={`text-2xl font-bold ${colorClass}`}>{value}</div>
+            </div>
+            <div className={`p-2 rounded-lg ${bgClass} ${colorClass}`}>
+                <Icon size={20} />
+            </div>
+        </div>
+    )
+}
 
 export default function ServicePrincipals({ data }: { data: ServicePrincipalsData }) {
   if (!data.all_apps.length) return null
@@ -26,23 +41,11 @@ export default function ServicePrincipals({ data }: { data: ServicePrincipalsDat
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <div className="text-sm font-medium text-gray-500 mb-1">Critical</div>
-            <div className="text-2xl font-bold text-rose-600">{data.summary.critical}</div>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <div className="text-sm font-medium text-gray-500 mb-1">High</div>
-            <div className="text-2xl font-bold text-amber-600">{data.summary.high}</div>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <div className="text-sm font-medium text-gray-500 mb-1">Medium</div>
-            <div className="text-2xl font-bold text-yellow-600">{data.summary.medium}</div>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <div className="text-sm font-medium text-gray-500 mb-1">Low</div>
-            <div className="text-2xl font-bold text-blue-600">{data.summary.low}</div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard title="Critical" value={data.summary.critical} colorClass="text-rose-600" bgClass="bg-rose-50" icon={ShieldAlert} />
+        <MetricCard title="High" value={data.summary.high} colorClass="text-amber-600" bgClass="bg-amber-50" icon={AlertTriangle} />
+        <MetricCard title="Medium" value={data.summary.medium} colorClass="text-yellow-600" bgClass="bg-yellow-50" icon={Shield} />
+        <MetricCard title="Low" value={data.summary.low} colorClass="text-blue-600" bgClass="bg-blue-50" icon={Info} />
       </div>
       <DataTable 
         title="Application Permissions"

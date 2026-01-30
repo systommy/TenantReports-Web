@@ -1,16 +1,18 @@
 import { 
   Shield, 
-  AlertTriangle, 
   Smartphone, 
-  CheckCircle, 
-  Activity,
-  ArrowRight
+  Users,
+  Monitor,
+  Building,
+  Hash,
+  Calendar,
+  Globe
 } from 'lucide-react';
 import type { ProcessedReport } from '../../processing/types';
 import ExpandableStatCard from '../common/ExpandableStatCard';
-import StatusPill from '../common/StatusPill';
-import LineChart from '../charts/LineChart';
 import SecurityScores from './SecurityScores';
+import Misconfigurations from './Misconfigurations';
+import MfaCoverage from './MfaCoverage';
 import { pct } from '../../utils/format';
 
 interface OverviewTabProps {
@@ -23,157 +25,143 @@ export default function OverviewTab({ data }: OverviewTabProps) {
   const scoreHistoryLabels = data.security.history.map(h => h.date);
   const scoreHistoryValues = data.security.history.map(h => h.score ?? 0);
   
-  const activeIncidents = data.sentinel.incidents.filter(i => i.status !== 'Closed');
-  const highSeverityIncidents = activeIncidents.filter(i => i.severity === 'High');
-  
   const mfaAtRisk = data.mfa.total_users - data.mfa.mfa_registered;
   
-  const nonCompliantDevices = (data.compliance.intune.nonCompliant as number) || 0;
-  
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Tenant Information */}
+      <div id="tenant-info" className="space-y-4">
+        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Tenant Information</h3>
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                <Building size={20} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase">Tenant Name</p>
+                <p className="text-sm font-bold text-gray-900 break-all">{data.tenant.organization_name}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                <Hash size={20} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase">Tenant ID</p>
+                <p className="text-xs font-mono font-bold text-gray-900 break-all">{data.tenant.tenant_id}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                <Calendar size={20} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase">Created Date</p>
+                <p className="text-sm font-bold text-gray-900">{data.tenant.created_date}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                <Globe size={20} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase">Primary Domain</p>
+                <p className="text-sm font-bold text-gray-900">{data.tenant.primary_domain}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Key Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <ExpandableStatCard 
-          title="Secure Score" 
-          value={`${data.security.current_score || 0}%`} 
-          subValue={scoreTrend ? `${scoreTrend > 0 ? '+' : ''}${scoreTrend.toFixed(1)}%` : undefined} 
-          intent={data.security.trend_direction === 'increase' ? 'success' : 'neutral'}
-          trendLabel={`Target: ${data.security.max_score}%`}
-          icon={Shield}
-        >
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs">
-              <span>Identity</span>
-              <span className="font-bold">{data.security.control_scores.find(c => c.category === 'Identity')?.score || '-'}</span>
+      <div id="executive-summary" className="space-y-4">
+        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Executive Summary</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ExpandableStatCard 
+            title="Secure Score" 
+            value={`${data.security.score_percentage ? data.security.score_percentage.toFixed(1) : 0}%`} 
+            subValue={scoreTrend ? `${scoreTrend > 0 ? '+' : ''}${scoreTrend.toFixed(1)}%` : undefined} 
+            intent={data.security.trend_direction === 'increase' ? 'success' : 'neutral'}
+            trendLabel={`Target: ${data.security.max_score} pts`}
+            icon={Shield}
+          >
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span>Identity</span>
+                <span className="font-bold">{data.security.control_scores.find(c => c.category === 'Identity')?.score || '-'}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span>Devices</span>
+                <span className="font-bold">{data.security.control_scores.find(c => c.category === 'Device')?.score || '-'}</span>
+              </div>
+               <div className="flex justify-between text-xs">
+                <span>Apps</span>
+                <span className="font-bold">{data.security.control_scores.find(c => c.category === 'Apps')?.score || '-'}</span>
+              </div>
             </div>
-            <div className="flex justify-between text-xs">
-              <span>Devices</span>
-              <span className="font-bold">{data.security.control_scores.find(c => c.category === 'Device')?.score || '-'}</span>
-            </div>
-             <div className="flex justify-between text-xs">
-              <span>Apps</span>
-              <span className="font-bold">{data.security.control_scores.find(c => c.category === 'Apps')?.score || '-'}</span>
-            </div>
-          </div>
-        </ExpandableStatCard>
+          </ExpandableStatCard>
 
-        <ExpandableStatCard 
-          title="Active Incidents" 
-          value={activeIncidents.length} 
-          subValue="Action Required" 
-          intent={activeIncidents.length > 0 ? 'danger' : 'success'}
-          trendLabel={`${highSeverityIncidents.length} High Severity`}
-          icon={AlertTriangle}
-        >
-           <div className="text-xs space-y-2">
-             {highSeverityIncidents.slice(0, 3).map((inc, i) => (
-               <div key={i} className="p-2 bg-rose-50 rounded border border-rose-100 text-rose-800 font-medium truncate">
-                 {inc.title}
+          <ExpandableStatCard 
+            title="MFA Coverage" 
+            value={pct(data.mfa.adoption_rate)} 
+            subValue={`${mfaAtRisk} At Risk`} 
+            intent={data.mfa.adoption_rate > 0.9 ? 'success' : 'warning'}
+            trendLabel="Target: 100%"
+            icon={Smartphone}
+          >
+             <div className="space-y-2 text-xs">
+               <div className="flex justify-between">
+                 <span>Registered</span>
+                 <span className="font-bold">{data.mfa.mfa_registered} / {data.mfa.total_users}</span>
                </div>
-             ))}
-             {highSeverityIncidents.length === 0 && (
-               <div className="text-gray-500 italic">No high severity incidents.</div>
-             )}
-           </div>
-        </ExpandableStatCard>
-
-        <ExpandableStatCard 
-          title="MFA Coverage" 
-          value={pct(data.mfa.adoption_rate)} 
-          subValue={`${mfaAtRisk} At Risk`} 
-          intent={data.mfa.adoption_rate > 0.9 ? 'success' : 'warning'}
-          trendLabel="Target: 100%"
-          icon={Smartphone}
-        >
-           <div className="space-y-2 text-xs">
-             <div className="flex justify-between">
-               <span>Registered</span>
-               <span className="font-bold">{data.mfa.mfa_registered} / {data.mfa.total_users}</span>
+               <div className="flex justify-between">
+                 <span>SSPR Enabled</span>
+                 <span className="font-bold">{pct(data.mfa.sspr_adoption_rate)}</span>
+               </div>
              </div>
-             <div className="flex justify-between">
-               <span>SSPR Enabled</span>
-               <span className="font-bold">{pct(data.mfa.sspr_adoption_rate)}</span>
+          </ExpandableStatCard>
+
+          <ExpandableStatCard 
+            title="Total Users" 
+            value={data.users.total}
+            subValue={`${data.users.enabled} Active`}
+            icon={Users}
+          >
+             <div className="space-y-1 text-xs">
+               <div className="flex justify-between"><span>Licensed</span> <strong>{data.users.licensed}</strong></div>
+               <div className="flex justify-between"><span>Guests</span> <strong>{data.users.guest}</strong></div>
              </div>
-           </div>
-        </ExpandableStatCard>
+          </ExpandableStatCard>
 
-        <ExpandableStatCard 
-          title="Compliance" 
-          value={`${data.compliance.intune.compliantPercent || 0}%`} 
-          subValue="Devices" 
-          intent={(data.compliance.intune.compliantPercent as number) > 90 ? 'success' : 'warning'}
-          trendLabel={`${nonCompliantDevices} Non-Compliant`}
-          icon={CheckCircle}
-        >
-           <div className="space-y-1 text-xs text-gray-500">
-             <div>Check device details for specifics on non-compliant policies.</div>
-           </div>
-        </ExpandableStatCard>
-      </div>
-
-      {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart Area */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6 shadow-sm flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="font-bold text-gray-900">Security Trends</h3>
-              <p className="text-sm text-gray-500">Score performance over time</p>
-            </div>
-          </div>
-          <div className="flex-1 min-h-[300px] w-full">
-            {scoreHistoryLabels.length > 0 ? (
-               <LineChart labels={scoreHistoryLabels} values={scoreHistoryValues} label="Secure Score" title="" />
-            ) : (
-              <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg border border-dashed border-gray-200 text-gray-400">
-                <div className="text-center">
-                  <Activity size={32} className="mx-auto mb-2 opacity-50" />
-                  <span className="text-sm font-medium">No history data available</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Quick Actions / List - High Density */}
-        <div className="lg:col-span-1 bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden h-full">
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-            <h3 className="font-bold text-gray-900 text-sm">Recent Alerts</h3>
-            <button className="text-xs text-indigo-600 font-medium hover:text-indigo-800 flex items-center gap-1">
-              View All <ArrowRight size={12} />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto max-h-[400px]">
-            {data.sentinel.incidents.slice(0, 10).map((inc, i) => (
-              <div key={i} className="group p-3 border-b border-gray-50 hover:bg-gray-50 transition-colors flex items-start gap-3 last:border-0 cursor-pointer">
-                <div className={`w-2 h-2 mt-1.5 rounded-full flex-shrink-0 shadow-sm ${
-                  inc.severity === 'High' ? 'bg-rose-500 shadow-rose-200' : 
-                  inc.severity === 'Medium' ? 'bg-amber-500 shadow-amber-200' : 'bg-blue-500'
-                }`} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
-                    {inc.title}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-0.5 flex justify-between">
-                    <StatusPill label={inc.status} size="xs" intent={
-                      inc.status === 'New' ? 'danger' : inc.status === 'Active' ? 'warning' : 'neutral'
-                    } />
-                    <span className="font-mono">{new Date(inc.created).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {data.sentinel.incidents.length === 0 && (
-              <div className="p-8 text-center text-gray-500 text-sm">
-                No active incidents found.
-              </div>
-            )}
-          </div>
+          <ExpandableStatCard 
+            title="Total Devices" 
+            value={data.tenant.total_devices} 
+            subValue="Managed" 
+            icon={Monitor}
+          >
+             <div className="text-xs text-gray-500">
+               Total devices registered in Entra ID / Intune.
+             </div>
+          </ExpandableStatCard>
         </div>
       </div>
 
-      <SecurityScores data={data.security} />
+      <div id="misconfigurations" className="space-y-4">
+        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Common Misconfigurations</h3>
+        <Misconfigurations data={data.configuration} />
+      </div>
+
+      <SecurityScores 
+        data={data.security} 
+        historyLabels={scoreHistoryLabels}
+        historyValues={scoreHistoryValues}
+      />
+
+      <div id="mfa-coverage" className="pt-8 border-t border-gray-200">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">MFA & Identity Security</h3>
+        <MfaCoverage data={data.mfa} />
+      </div>
     </div>
   );
 }

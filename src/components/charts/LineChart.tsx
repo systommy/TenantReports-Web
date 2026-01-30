@@ -12,26 +12,29 @@ interface Props {
 
 export default function LineChart({ labels, values, label, title }: Props) {
   return (
-    <div>
+    <div className="w-full h-full flex flex-col">
       {title && <h3 className="text-sm font-medium text-gray-600 text-center mb-2">{title}</h3>}
-      <Line
-        data={{
-          labels,
-          datasets: [{
-            label,
-            data: values,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            fill: true,
-            tension: 0.3,
-          }],
-        }}
-        options={{
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: false } },
-        }}
-      />
+      <div className="flex-1 min-h-0 relative">
+        <Line
+          data={{
+            labels,
+            datasets: [{
+              label,
+              data: values,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              fill: true,
+              tension: 0.3,
+            }],
+          }}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: false } },
+          }}
+        />
+      </div>
     </div>
   )
 }

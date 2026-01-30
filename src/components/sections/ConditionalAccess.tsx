@@ -2,6 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import DataTable from '../tables/DataTable'
 import StatusPill from '../common/StatusPill'
 import { formatDate } from '../../utils/format'
+import { FileText, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 import type { ConditionalAccess as ConditionalAccessData, ConditionalAccessPolicy } from '../../processing/types'
 
 function stringify(val: unknown): string {
@@ -9,6 +10,20 @@ function stringify(val: unknown): string {
   if (Array.isArray(val)) return val.length ? val.join(', ') : '—'
   if (typeof val === 'object') return JSON.stringify(val)
   return String(val)
+}
+
+function MetricCard({ title, value, colorClass, bgClass, icon: Icon }: { title: string; value: number | string; colorClass: string; bgClass: string; icon: any }) {
+    return (
+        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex items-start justify-between group hover:border-indigo-200 transition-colors">
+            <div>
+                <div className="text-sm font-medium text-gray-500 mb-1">{title}</div>
+                <div className={`text-2xl font-bold ${colorClass}`}>{value}</div>
+            </div>
+            <div className={`p-2 rounded-lg ${bgClass} ${colorClass}`}>
+                <Icon size={20} />
+            </div>
+        </div>
+    )
 }
 
 export default function ConditionalAccess({ data }: { data: ConditionalAccessData }) {
@@ -20,7 +35,7 @@ export default function ConditionalAccess({ data }: { data: ConditionalAccessDat
       accessorKey: 'state', header: 'State',
       cell: ({ getValue }) => {
         const v = (getValue() as string)?.toLowerCase();
-        const intent = v === 'enabled' ? 'success' : v === 'disabled' ? 'neutral' : 'warning';
+        const intent = v === 'enabled' ? 'success' : v === 'disabled' ? 'danger' : 'warning';
         return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
       },
     },
@@ -41,23 +56,11 @@ export default function ConditionalAccess({ data }: { data: ConditionalAccessDat
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <div className="text-sm font-medium text-gray-500 mb-1">Total Policies</div>
-            <div className="text-2xl font-bold text-gray-900">{summary.total_policies}</div>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <div className="text-sm font-medium text-gray-500 mb-1">Enabled</div>
-            <div className="text-2xl font-bold text-emerald-600">{summary.enabled}</div>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <div className="text-sm font-medium text-gray-500 mb-1">Disabled</div>
-            <div className="text-2xl font-bold text-gray-400">{summary.disabled}</div>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <div className="text-sm font-medium text-gray-500 mb-1">Report Only</div>
-            <div className="text-2xl font-bold text-amber-500">{summary.report_only}</div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard title="Total Policies" value={summary.total_policies} colorClass="text-gray-900" bgClass="bg-gray-100" icon={FileText} />
+        <MetricCard title="Enabled" value={summary.enabled} colorClass="text-emerald-600" bgClass="bg-emerald-50" icon={CheckCircle} />
+        <MetricCard title="Disabled" value={summary.disabled} colorClass="text-rose-600" bgClass="bg-rose-50" icon={XCircle} />
+        <MetricCard title="Report Only" value={summary.report_only} colorClass="text-amber-600" bgClass="bg-amber-50" icon={AlertCircle} />
       </div>
       <DataTable 
         title="Policy List"

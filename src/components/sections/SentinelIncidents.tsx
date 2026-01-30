@@ -27,7 +27,6 @@ const columns: ColumnDef<Incident, unknown>[] = [
         return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
     },
   },
-  { accessorKey: 'classification', header: 'Classification' },
 ]
 
 export default function SentinelIncidents({ data }: { data: SentinelIncidentsData }) {
@@ -36,10 +35,10 @@ export default function SentinelIncidents({ data }: { data: SentinelIncidentsDat
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 h-64">
              <BarChart labels={Object.keys(data.by_severity)} datasets={[{ label: 'Incidents', values: Object.values(data.by_severity) }]} title="By Severity" />
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 h-64">
              <BarChart labels={Object.keys(data.by_status)} datasets={[{ label: 'Incidents', values: Object.values(data.by_status) }]} title="By Status" />
         </div>
       </div>

@@ -1,5 +1,5 @@
+import type { TenantOverview, Domain, TenantConfiguration } from './types'
 import { formatDate } from '../utils/format'
-import type { TenantOverview, Domain } from './types'
 
 function getDict(source: Record<string, unknown>, key: string): Record<string, unknown> {
   const value = source[key]
@@ -10,31 +10,61 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
 export function processTenantOverview(data: Record<string, unknown>): TenantOverview {
   const tenantInfo = getDict(data, 'TenantInfo')
   const summary = getDict(tenantInfo, 'Summary')
+  const directoryStats = getDict(tenantInfo, 'DirectoryStatistics')
   const metadata = getDict(data, 'ReportMetadata')
+
   return {
-    organization_name: (summary.OrganizationName as string) ?? 'Unknown',
-    primary_domain: (summary.PrimaryDomain as string) ?? 'Unknown',
+    organization_name: (summary.OrganizationName as string) ?? 'Unknown Organization',
+    primary_domain: (summary.PrimaryDomain as string) ?? '',
     domains_total: (summary.TotalDomains as number) ?? 0,
-    generation_date: formatDate(metadata.GeneratedDate as string | null),
+    generation_date: formatDate((summary.ReportGeneratedDate as string) ?? (metadata.GeneratedDate as string) ?? new Date().toISOString()),
+    tenant_id: (summary.TenantId as string) ?? '',
+    created_date: formatDate(summary.TenantId as string | null),
+    total_devices: (directoryStats.TotalDevices as number) ?? 0,
   }
 }
 
 export function processDomains(data: Record<string, unknown>): Domain[] {
   const tenantInfo = getDict(data, 'TenantInfo')
-  const allDomains = tenantInfo.AllDomains
-  if (!Array.isArray(allDomains)) return []
-  const rows: Domain[] = []
-  for (const domain of allDomains) {
-    if (typeof domain === 'object' && domain !== null && !Array.isArray(domain)) {
-      const d = domain as Record<string, unknown>
-      rows.push({
-        domain: (d.Id as string) ?? null,
-        is_default: Boolean(d.IsDefault),
-        is_initial: Boolean(d.IsInitial),
-        is_verified: Boolean(d.IsVerified),
-        authentication_type: (d.AuthenticationType as string) ?? null,
-      })
-    }
+  const domains = Array.isArray(tenantInfo.AllDomains) ? tenantInfo.AllDomains : []
+  
+  const domainRows: Domain[] = []
+  for (const item of domains) {
+    if (typeof item !== 'object' || item === null) continue
+    const d = item as Record<string, unknown>
+    domainRows.push({
+      domain: (d.Id as string) ?? null,
+      is_default: Boolean(d.IsDefault),
+      is_initial: Boolean(d.IsInitial),
+      is_verified: Boolean(d.IsVerified),
+      authentication_type: (d.AuthenticationType as string) ?? null,
+    })
   }
-  return rows
+  return domainRows
+}
+
+export function processTenantConfiguration(data: Record<string, unknown>): TenantConfiguration {
+  const config = getDict(data, 'TenantConfiguration')
+  const summary = getDict(config, 'Summary')
+  const settings = Array.isArray(config.Settings) ? config.Settings : []
+
+  const rows = settings.map((item: any) => ({
+    category: item.Category,
+    name: item.SettingName,
+    current_value: item.CurrentValue,
+    recommended_value: item.RecommendedValue,
+    risk_level: item.RiskLevel,
+    description: item.Description,
+    recommendation: item.Recommendation,
+  }))
+
+  return {
+    summary: {
+      total: (summary.TotalSettings as number) ?? 0,
+      high_risk: (summary.HighRiskCount as number) ?? 0,
+      medium_risk: (summary.MediumRiskCount as number) ?? 0,
+      low_risk: (summary.LowRiskCount as number) ?? 0,
+    },
+    settings: rows,
+  }
 }

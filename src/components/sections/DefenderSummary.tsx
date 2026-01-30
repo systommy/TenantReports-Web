@@ -21,7 +21,14 @@ const columns: ColumnDef<Threat, unknown>[] = [
 ]
 
 export default function DefenderSummary({ data }: { data: DefenderSummaryData }) {
-  if (!data.threats.length && !Object.keys(data.summary).length) return null
+  if (!data.threats.length && !Object.keys(data.summary).length) {
+    return (
+      <div className="bg-gray-50 rounded-xl border border-dashed border-gray-200 p-8 text-center">
+        <div className="text-gray-500 font-medium">No threats detected</div>
+        <div className="text-xs text-gray-400 mt-1">Microsoft Defender for Cloud found no active threats.</div>
+      </div>
+    )
+  }
 
   const summaryEntries = Object.entries(data.summary)
 

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import DataTable from '../tables/DataTable';
 import StatusPill from '../common/StatusPill';
-import { Users, UserCheck, UserX, Shield } from 'lucide-react';
+import { Users, UserCheck, UserX, Shield, CreditCard } from 'lucide-react';
 
 interface UserMetricsProps {
   data: any;
@@ -42,6 +42,7 @@ export default function UserMetrics({ data, details }: UserMetricsProps) {
   const filters = [
     { label: 'All Users', count: data.total, key: null, icon: Users },
     { label: 'Admins', count: data.admin, key: 'IsAdmin=true', icon: Shield },
+    { label: 'Licensed Users', count: data.licensed, key: 'IsLicensed=true', icon: CreditCard },
     { label: 'Enabled', count: data.enabled, key: 'AccountEnabled=true', icon: UserCheck },
     { label: 'Disabled', count: data.disabled, key: 'AccountEnabled=false', icon: UserX },
     { label: 'Guests', count: data.guest, key: 'UserType=Guest', icon: Users },
@@ -56,12 +57,12 @@ export default function UserMetrics({ data, details }: UserMetricsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="flex flex-wrap gap-2">
         {filters.map((f) => (
           <button
             key={f.label}
             onClick={() => setFilter(filter === f.key ? null : f.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors whitespace-nowrap ${
+            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-colors whitespace-nowrap ${
               filter === f.key
                 ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
                 : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'

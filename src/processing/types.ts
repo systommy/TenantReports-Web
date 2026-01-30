@@ -3,6 +3,9 @@ export interface TenantOverview {
   primary_domain: string
   domains_total: number
   generation_date: string
+  tenant_id: string
+  created_date: string
+  total_devices: number
 }
 
 export interface Domain {
@@ -46,6 +49,26 @@ export interface SecurityScores {
   trend_value: number; trend_direction: 'increase' | 'decrease' | 'stable'
   control_scores: ControlScore[]
   trend_percentage_change: number | null; trend_period_days: number | null
+}
+
+export interface MisconfigurationSetting {
+  category: string
+  name: string
+  current_value: string | boolean
+  recommended_value: string | boolean
+  risk_level: string
+  description: string
+  recommendation: string
+}
+
+export interface TenantConfiguration {
+  summary: {
+    total: number
+    high_risk: number
+    medium_risk: number
+    low_risk: number
+  }
+  settings: MisconfigurationSetting[]
 }
 
 export interface LicenseItem {
@@ -142,16 +165,45 @@ export interface AppleMdm {
   certificates: { name: string | null; type: string | null; apple_id: string | null; expiration: string; days_left: number | null; status: string | null; serial: string | null }[]
 }
 
+export interface LicenseChange {
+  timestamp: string
+  user: string
+  target_user: string
+  action: string
+  sku: string
+}
+
+export interface AppCredentialExpiry {
+  app_name: string
+  app_id: string
+  key_id: string
+  type: string
+  end_date: string
+  days_until_expiry: number
+  status: string
+}
+
+export interface SharedMailbox {
+  display_name: string
+  upn: string
+  sign_in_enabled: boolean
+  has_license: boolean
+  is_compliant: boolean
+}
+
 export interface ProcessedReport {
   tenant: TenantOverview
   domains: Domain[]
+  configuration: TenantConfiguration
   users: UsersSummary
   userDetails: Record<string, unknown>[]
   mfa: MfaCoverage
   security: SecurityScores
   licenses: LicenseOverview
+  licenseChanges: LicenseChange[]
   conditionalAccess: ConditionalAccess
   servicePrincipals: ServicePrincipals
+  appCredentials: AppCredentialExpiry[]
   sentinel: SentinelIncidents
   defender: DefenderSummary
   mailbox: PermissionsSummary
@@ -159,6 +211,7 @@ export interface ProcessedReport {
   audit: AuditEvents
   riskyUsers: RiskyUser[]
   compliance: ComplianceOverview
+  sharedMailboxes: SharedMailbox[]
   privileged: PrivilegedRoles
   appleMdm: AppleMdm
   deviceDetails: Record<string, unknown>[]

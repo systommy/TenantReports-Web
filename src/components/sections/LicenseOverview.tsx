@@ -2,7 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import BarChart from '../charts/BarChart'
 import DataTable from '../tables/DataTable'
 import { pct } from '../../utils/format'
-import type { LicenseOverview as LicenseOverviewData, LicenseItem } from '../../processing/types'
+import type { LicenseOverview as LicenseOverviewData, LicenseItem, LicenseChange } from '../../processing/types'
 
 const columns: ColumnDef<LicenseItem, unknown>[] = [
   { accessorKey: 'name', header: 'Name' },
@@ -28,7 +28,15 @@ const columns: ColumnDef<LicenseItem, unknown>[] = [
   },
 ]
 
-export default function LicenseOverview({ data }: { data: LicenseOverviewData }) {
+const changeColumns: ColumnDef<LicenseChange, unknown>[] = [
+  { accessorKey: 'timestamp', header: 'Date' },
+  { accessorKey: 'user', header: 'Initiated By' },
+  { accessorKey: 'target_user', header: 'Target User' },
+  { accessorKey: 'action', header: 'Action' },
+  { accessorKey: 'sku', header: 'License' },
+]
+
+export default function LicenseOverview({ data, changes }: { data: LicenseOverviewData; changes: LicenseChange[] }) {
   const { licenses } = data
   
   const chartLicenses = [...licenses]
@@ -43,25 +51,37 @@ export default function LicenseOverview({ data }: { data: LicenseOverviewData })
   const sortedTableLicenses = [...licenses].sort((a, b) => b.assigned - a.assigned)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {chartLabels.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <BarChart
-            labels={chartLabels}
-            datasets={[
-              { label: 'Assigned', values: assigned },
-              { label: 'Available', values: available },
-            ]}
-            title="Top 10 Assigned Licenses"
-          />
+          <div className="h-64">
+              <BarChart
+                labels={chartLabels}
+                datasets={[
+                  { label: 'Assigned', values: assigned },
+                  { label: 'Available', values: available },
+                ]}
+                title="Top 10 Assigned Licenses"
+              />
+          </div>
         </div>
       )}
+      
       <DataTable 
         title="License Distribution"
         columns={columns} 
         data={sortedTableLicenses} 
         pageSize={15}
       />
+
+      {changes && changes.length > 0 && (
+        <DataTable 
+          title="Recent License Changes"
+          columns={changeColumns} 
+          data={changes} 
+          pageSize={10} 
+        />
+      )}
     </div>
   )
 }

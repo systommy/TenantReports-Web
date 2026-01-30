@@ -1,5 +1,5 @@
 import { formatDate } from '../utils/format'
-import type { ServicePrincipals } from './types'
+import type { ServicePrincipals, AppCredentialExpiry } from './types'
 
 function getDict(source: Record<string, unknown>, key: string): Record<string, unknown> {
   const value = source[key]
@@ -82,4 +82,24 @@ export function processServicePrincipals(data: Record<string, unknown>): Service
       low: riskCounts.low,
     },
   }
+}
+
+export function processAppCredentials(data: Record<string, unknown>): AppCredentialExpiry[] {
+  const expiry = Array.isArray(data.AppRegistrationExpiry) ? data.AppRegistrationExpiry : []
+  const rows: AppCredentialExpiry[] = []
+
+  for (const item of expiry) {
+    if (typeof item !== 'object' || item === null) continue
+    const e = item as Record<string, unknown>
+    rows.push({
+      app_name: (e.AppName as string) ?? (e.DisplayName as string) ?? 'Unknown',
+      app_id: (e.AppId as string) ?? '',
+      key_id: (e.KeyId as string) ?? '',
+      type: (e.Type as string) ?? 'Secret',
+      end_date: formatDate((e.EndDate as string) ?? null),
+      days_until_expiry: (e.DaysUntilExpiry as number) ?? 0,
+      status: (e.Status as string) ?? 'Unknown',
+    })
+  }
+  return rows
 }

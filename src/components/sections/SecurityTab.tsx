@@ -2,6 +2,7 @@ import type { ProcessedReport } from '../../processing/types';
 import SentinelIncidents from './SentinelIncidents';
 import DefenderSummary from './DefenderSummary';
 import ExpiringCredentials from './ExpiringCredentials';
+import AppCredentials from './AppCredentials';
 
 export default function SecurityTab({ data }: { data: ProcessedReport }) {
   return (
@@ -18,6 +19,7 @@ export default function SecurityTab({ data }: { data: ProcessedReport }) {
          <div className="space-y-4">
             <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">App Security</h3>
             <ExpiringCredentials credentials={data.servicePrincipals?.expiring_credentials} />
+            <AppCredentials data={data.appCredentials} />
          </div>
       </div>
     </div>

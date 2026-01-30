@@ -27,12 +27,14 @@ export default function MfaCoverage({ data }: { data: MfaCoverageData }) {
       </div>
       {methods.labels.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <BarChart
-            labels={methods.labels}
-            datasets={[{ label: 'Count', values: methods.values }]}
-            title="MFA Methods"
-            horizontal
-            />
+            <div className="h-64">
+                <BarChart
+                labels={methods.labels}
+                datasets={[{ label: 'Count', values: methods.values }]}
+                title="MFA Methods"
+                horizontal
+                />
+            </div>
         </div>
       )}
     </div>
