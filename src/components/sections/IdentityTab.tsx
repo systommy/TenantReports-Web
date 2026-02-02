@@ -4,7 +4,6 @@ import ExpandableStatCard from '../common/ExpandableStatCard';
 import UserMetrics from './UserMetrics';
 import PrivilegedAccess from './PrivilegedAccess';
 import RiskyUsers from './RiskyUsers';
-import ConditionalAccess from './ConditionalAccess';
 import ServicePrincipals from './ServicePrincipals';
 import MailboxPermissions from './MailboxPermissions';
 import CalendarPermissions from './CalendarPermissions';
@@ -123,14 +122,9 @@ export default function IdentityTab({ data }: { data: ProcessedReport }) {
          <RiskyUsers data={data.riskyUsers} />
       </div>
 
-      <div id="conditional-access" className="space-y-4">
-         <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Conditional Access</h3>
-         <ConditionalAccess data={data.conditionalAccess} />
-      </div>
-
       <div id="service-principals" className="space-y-4">
          <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Service Principals & App Registrations</h3>
-         <ServicePrincipals data={data.servicePrincipals} />
+         <ServicePrincipals data={data.servicePrincipals} appCredentials={data.appCredentials} />
       </div>
 
       <div id="mailbox-permissions" className="space-y-4">

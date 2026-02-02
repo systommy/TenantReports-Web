@@ -2,11 +2,10 @@ import type { ColumnDef } from '@tanstack/react-table'
 import BarChart from '../charts/BarChart'
 import DataTable from '../tables/DataTable'
 import { pct } from '../../utils/format'
-import type { LicenseOverview as LicenseOverviewData, LicenseItem, LicenseChange } from '../../processing/types'
+import type { LicenseOverview as LicenseOverviewData, LicenseItem } from '../../processing/types'
 
 const columns: ColumnDef<LicenseItem, unknown>[] = [
   { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'sku', header: 'SKU' },
   { accessorKey: 'assigned', header: 'Assigned' },
   { accessorKey: 'available', header: 'Available' },
   {
@@ -21,22 +20,14 @@ const columns: ColumnDef<LicenseItem, unknown>[] = [
                         style={{ width: `${val * 100}%` }}
                     />
                 </div>
-                <span className="text-xs font-mono">{pct(val)}</span>
+                <span className="text-xs font-mono">{pct(val * 100)}</span>
             </div>
         )
     },
   },
 ]
 
-const changeColumns: ColumnDef<LicenseChange, unknown>[] = [
-  { accessorKey: 'timestamp', header: 'Date' },
-  { accessorKey: 'user', header: 'Initiated By' },
-  { accessorKey: 'target_user', header: 'Target User' },
-  { accessorKey: 'action', header: 'Action' },
-  { accessorKey: 'sku', header: 'License' },
-]
-
-export default function LicenseOverview({ data, changes }: { data: LicenseOverviewData; changes: LicenseChange[] }) {
+export default function LicenseOverview({ data }: { data: LicenseOverviewData }) {
   const { licenses } = data
   
   const chartLicenses = [...licenses]
@@ -71,17 +62,8 @@ export default function LicenseOverview({ data, changes }: { data: LicenseOvervi
         title="License Distribution"
         columns={columns} 
         data={sortedTableLicenses} 
-        pageSize={15}
+        pageSize={10}
       />
-
-      {changes && changes.length > 0 && (
-        <DataTable 
-          title="Recent License Changes"
-          columns={changeColumns} 
-          data={changes} 
-          pageSize={10} 
-        />
-      )}
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import DataTable from '../tables/DataTable';
 import StatusPill from '../common/StatusPill';
-import { Users, UserCheck, UserX, Shield, CreditCard } from 'lucide-react';
+import { Users, UserCheck, UserX, Shield, CreditCard, UserMinus } from 'lucide-react';
 
 interface UserMetricsProps {
   data: any;
@@ -45,6 +45,7 @@ export default function UserMetrics({ data, details }: UserMetricsProps) {
     { label: 'Licensed Users', count: data.licensed, key: 'IsLicensed=true', icon: CreditCard },
     { label: 'Enabled', count: data.enabled, key: 'AccountEnabled=true', icon: UserCheck },
     { label: 'Disabled', count: data.disabled, key: 'AccountEnabled=false', icon: UserX },
+    { label: 'Inactive', count: data.inactive, key: 'IsInactive=true', icon: UserMinus },
     { label: 'Guests', count: data.guest, key: 'UserType=Guest', icon: Users },
   ];
 

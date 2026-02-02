@@ -13,6 +13,8 @@ import ExpandableStatCard from '../common/ExpandableStatCard';
 import SecurityScores from './SecurityScores';
 import Misconfigurations from './Misconfigurations';
 import MfaCoverage from './MfaCoverage';
+import LicenseOverview from './LicenseOverview';
+import ConditionalAccess from './ConditionalAccess';
 import { pct } from '../../utils/format';
 
 interface OverviewTabProps {
@@ -22,16 +24,18 @@ interface OverviewTabProps {
 export default function OverviewTab({ data }: OverviewTabProps) {
   // --- Data Preparation ---
   const scoreTrend = data.security.trend_percentage_change;
-  const scoreHistoryLabels = data.security.history.map(h => h.date);
+  const scoreHistoryLabels = data.security.history.map(h => h.date.split(' ')[0]);
   const scoreHistoryValues = data.security.history.map(h => h.score ?? 0);
   
   const mfaAtRisk = data.mfa.total_users - data.mfa.mfa_registered;
   
   return (
     <div className="space-y-8">
-      {/* Tenant Information */}
-      <div id="tenant-info" className="space-y-4">
-        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Tenant Information</h3>
+      {/* Tenant Overview */}
+      <div id="tenant-overview" className="space-y-6">
+        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Tenant Overview</h3>
+        
+        {/* Basic Info Card */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="flex items-start gap-3">
@@ -72,11 +76,8 @@ export default function OverviewTab({ data }: OverviewTabProps) {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Key Metrics Row */}
-      <div id="executive-summary" className="space-y-4">
-        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Executive Summary</h3>
+        {/* Key Metrics Grid (Moved from Executive Summary) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <ExpandableStatCard 
             title="Secure Score" 
@@ -161,6 +162,16 @@ export default function OverviewTab({ data }: OverviewTabProps) {
       <div id="mfa-coverage" className="pt-8 border-t border-gray-200">
         <h3 className="text-lg font-bold text-gray-900 mb-4">MFA & Identity Security</h3>
         <MfaCoverage data={data.mfa} />
+      </div>
+
+      <div id="license-overview" className="pt-8 border-t border-gray-200">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">License Overview</h3>
+        <LicenseOverview data={data.licenses} />
+      </div>
+
+      <div id="conditional-access-overview" className="pt-8 border-t border-gray-200">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Conditional Access Policies</h3>
+        <ConditionalAccess data={data.conditionalAccess} />
       </div>
     </div>
   );

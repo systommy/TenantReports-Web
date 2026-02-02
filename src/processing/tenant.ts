@@ -19,7 +19,7 @@ export function processTenantOverview(data: Record<string, unknown>): TenantOver
     domains_total: (summary.TotalDomains as number) ?? 0,
     generation_date: formatDate((summary.ReportGeneratedDate as string) ?? (metadata.GeneratedDate as string) ?? new Date().toISOString()),
     tenant_id: (summary.TenantId as string) ?? '',
-    created_date: formatDate(summary.TenantId as string | null),
+    created_date: formatDate(summary.CreatedDateTime as string | null),
     total_devices: (directoryStats.TotalDevices as number) ?? 0,
   }
 }

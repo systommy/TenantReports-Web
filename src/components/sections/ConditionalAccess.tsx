@@ -1,7 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import DataTable from '../tables/DataTable'
 import StatusPill from '../common/StatusPill'
-import { formatDate } from '../../utils/format'
 import { FileText, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 import type { ConditionalAccess as ConditionalAccessData, ConditionalAccessPolicy } from '../../processing/types'
 
@@ -34,9 +33,24 @@ export default function ConditionalAccess({ data }: { data: ConditionalAccessDat
     {
       accessorKey: 'state', header: 'State',
       cell: ({ getValue }) => {
-        const v = (getValue() as string)?.toLowerCase();
-        const intent = v === 'enabled' ? 'success' : v === 'disabled' ? 'danger' : 'warning';
-        return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
+        const v = (getValue() as string) ?? '';
+        const lower = v.toLowerCase();
+        
+        let label = v;
+        let intent: 'success' | 'danger' | 'warning' | 'neutral' = 'neutral';
+
+        if (lower === 'enabled') {
+            intent = 'success';
+        } else if (lower === 'disabled') {
+            intent = 'danger';
+        } else if (lower === 'enabledforreportingbutnotenforced') {
+            label = 'ReportOnly';
+            intent = 'warning';
+        } else {
+            intent = 'warning';
+        }
+        
+        return <StatusPill label={label} intent={intent} />;
       },
     },
     {
@@ -51,7 +65,6 @@ export default function ConditionalAccess({ data }: { data: ConditionalAccessDat
       accessorKey: 'covers_all_users', header: 'Covers All Users',
       cell: ({ getValue }) => <StatusPill label={getValue() ? 'Yes' : 'No'} intent={getValue() ? 'info' : 'neutral'} />,
     },
-    { accessorKey: 'created_date', header: 'Created', cell: ({ getValue }) => formatDate(getValue() as string) },
   ]
 
   return (

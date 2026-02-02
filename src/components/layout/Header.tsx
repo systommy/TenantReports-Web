@@ -10,14 +10,14 @@ interface HeaderProps {
 
 export default function Header({ tenantName, primaryDomain, onReset, children }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+    <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 py-4 flex items-center justify-between print:static print:border-none print:px-0 print:py-0 print:mb-4">
       <div>
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-bold text-gray-900 tracking-tight">{tenantName || 'Tenant Overview'}</h2>
-          <span className="font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">{primaryDomain}</span>
+          <span className="font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 border border-gray-200">{primaryDomain}</span>
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 no-print">
         <div className="relative group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
           <input 

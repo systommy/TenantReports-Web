@@ -39,7 +39,7 @@ export default function Misconfigurations({ data }: Props) {
   if (!data.settings.length) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {sortedSettings.map((item, idx) => {
         const id = `${item.category}-${item.name}-${idx}`;
         const isConfigured = item.current_value === item.recommended_value;

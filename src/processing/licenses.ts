@@ -7,10 +7,21 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
   return value as Record<string, unknown>
 }
 
+function toArray(source: unknown): unknown[] {
+  if (Array.isArray(source)) return source
+  if (typeof source === 'object' && source !== null) return Object.values(source)
+  return []
+}
+
+function extractSku(raw: string): string {
+    const match = raw.match(/SkuName=([^,\]]+)/)
+    return match ? match[1] : raw
+}
+
 export function processLicenseOverview(data: Record<string, unknown>): LicenseOverview {
   const alloc = getDict(data, 'LicenseAllocation')
   const summary = getDict(alloc, 'Summary')
-  const licenses = Array.isArray(alloc.Licenses) ? alloc.Licenses : []
+  const licenses = toArray(alloc.Licenses)
 
   const licenseRows: LicenseItem[] = []
   for (const item of licenses) {
@@ -39,19 +50,57 @@ export function processLicenseOverview(data: Record<string, unknown>): LicenseOv
 }
 
 export function processLicenseChanges(data: Record<string, unknown>): LicenseChange[] {
-  const changes = Array.isArray(data.LicenseChangeAudit) ? data.LicenseChangeAudit : []
+  let raw = data.LicenseChangeAudit
+  if (raw && typeof raw === 'object' && 'Changes' in raw) {
+      raw = (raw as Record<string, unknown>).Changes
+  }
+  
+  const changes = toArray(raw)
   const rows: LicenseChange[] = []
 
   for (const item of changes) {
     if (typeof item !== 'object' || item === null) continue
     const l = item as Record<string, unknown>
-    rows.push({
-      timestamp: formatDate((l.Timestamp as string) ?? null),
-      user: (l.InitiatedBy as string) ?? 'System',
-      target_user: (l.TargetUser as string) ?? (l.TargetUserUPN as string) ?? 'Unknown',
-      action: (l.Activity as string) ?? (l.Action as string) ?? 'Unknown',
-      sku: (l.Sku as string) ?? (l.License as string) ?? '-',
-    })
+    
+    const timestamp = formatDate((l.ActivityDate as string) ?? (l.Timestamp as string) ?? null)
+    const user = (l.InitiatedBy as string) ?? 'System'
+    const target = (l.UserPrincipal as string) ?? (l.TargetUser as string) ?? (l.TargetUserUPN as string) ?? 'Unknown'
+    
+    const added = toArray(l.AddedLicenses) as string[]
+    const removed = toArray(l.RemovedLicenses) as string[]
+    
+    if (added.length > 0 || removed.length > 0) {
+        // New format with arrays
+        for (const lic of added) {
+            rows.push({
+                timestamp,
+                user,
+                target_user: target,
+                action: 'Assigned',
+                sku: extractSku(String(lic))
+            })
+        }
+        for (const lic of removed) {
+            rows.push({
+                timestamp,
+                user,
+                target_user: target,
+                action: 'Removed',
+                sku: extractSku(String(lic))
+            })
+        }
+    } else {
+        // Legacy format or unknown
+        rows.push({
+            timestamp,
+            user,
+            target_user: target,
+            action: (l.Activity as string) ?? (l.Action as string) ?? 'Unknown',
+            sku: (l.Sku as string) ?? (l.License as string) ?? '-',
+        })
+    }
   }
-  return rows
+  
+  // Sort by date desc (if not already)
+  return rows.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 }

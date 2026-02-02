@@ -2,7 +2,9 @@ import type { ColumnDef } from '@tanstack/react-table'
 import DataTable from '../tables/DataTable'
 import StatusPill from '../common/StatusPill'
 import { AlertTriangle, ShieldAlert, Shield, Info } from 'lucide-react'
-import type { ServicePrincipals as ServicePrincipalsData, ServicePrincipalApp } from '../../processing/types'
+import type { ServicePrincipals as ServicePrincipalsData, ServicePrincipalApp, AppCredentialExpiry } from '../../processing/types'
+import ExpiringCredentials from './ExpiringCredentials'
+import AppCredentials from './AppCredentials'
 
 function MetricCard({ title, value, colorClass, bgClass, icon: Icon }: { title: string; value: number | string; colorClass: string; bgClass: string; icon: any }) {
     return (
@@ -18,7 +20,7 @@ function MetricCard({ title, value, colorClass, bgClass, icon: Icon }: { title: 
     )
 }
 
-export default function ServicePrincipals({ data }: { data: ServicePrincipalsData }) {
+export default function ServicePrincipals({ data, appCredentials }: { data: ServicePrincipalsData; appCredentials: AppCredentialExpiry[] }) {
   if (!data.all_apps.length) return null
 
   const columns: ColumnDef<ServicePrincipalApp, unknown>[] = [
@@ -41,6 +43,12 @@ export default function ServicePrincipals({ data }: { data: ServicePrincipalsDat
 
   return (
     <div className="space-y-6">
+      <AppCredentials data={appCredentials} />
+      
+      {data.expiring_credentials.length > 0 && (
+          <ExpiringCredentials credentials={data.expiring_credentials} />
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard title="Critical" value={data.summary.critical} colorClass="text-rose-600" bgClass="bg-rose-50" icon={ShieldAlert} />
         <MetricCard title="High" value={data.summary.high} colorClass="text-amber-600" bgClass="bg-amber-50" icon={AlertTriangle} />

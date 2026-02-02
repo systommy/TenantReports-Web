@@ -4,13 +4,12 @@ import {
   ShieldAlert, 
   Users, 
   CheckCircle, 
-  CreditCard, 
   Activity,
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
 
-export type TabId = 'overview' | 'identity' | 'security' | 'compliance' | 'licensing' | 'audit';
+export type TabId = 'overview' | 'identity' | 'security' | 'compliance' | 'audit';
 
 interface SidebarProps {
   activeTab: TabId;
@@ -19,18 +18,19 @@ interface SidebarProps {
 
 const SECTIONS: Record<TabId, { id: string; label: string }[]> = {
   overview: [
-    { id: 'executive-summary', label: 'Executive Summary' },
+    { id: 'tenant-overview', label: 'Tenant Overview' },
     { id: 'misconfigurations', label: 'Common Misconfigurations' },
     { id: 'ms365-secure-score', label: 'MS365 Secure Score' },
     { id: 'azure-secure-score', label: 'Azure Secure Score' },
     { id: 'mfa-coverage', label: 'MFA Coverage' },
+    { id: 'license-overview', label: 'License Overview' },
+    { id: 'conditional-access-overview', label: 'Conditional Access' },
   ],
   identity: [
     { id: 'user-directory', label: 'User Directory' },
     { id: 'privileged-access', label: 'Privileged Access' },
     { id: 'pim-activations', label: 'PIM Activations' },
     { id: 'risky-users', label: 'Risky Users' },
-    { id: 'conditional-access', label: 'Conditional Access' },
     { id: 'service-principals', label: 'Service Principals' },
     { id: 'mailbox-permissions', label: 'Mailbox Permissions' },
     { id: 'calendar-permissions', label: 'Calendar Permissions' },
@@ -45,12 +45,10 @@ const SECTIONS: Record<TabId, { id: string; label: string }[]> = {
     { id: 'apple-mdm-certificates', label: 'Apple MDM Certificates' },
     { id: 'shared-mailboxes', label: 'Shared Mailbox Compliance' },
   ],
-  licensing: [
-    { id: 'license-overview', label: 'License Overview' },
-  ],
   audit: [
     { id: 'group-modifications', label: 'Group Modifications' },
     { id: 'user-modifications', label: 'User Modifications' },
+    { id: 'license-changes', label: 'Recent License Changes' },
   ],
 };
 
@@ -133,7 +131,6 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     identity: true,
     security: true,
     compliance: true,
-    licensing: true,
     audit: true,
   });
 
@@ -142,7 +139,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   };
 
   return (
-    <aside className="w-64 border-r border-gray-200 bg-white flex flex-col fixed h-full z-20">
+    <aside className="w-64 border-r border-gray-200 bg-white flex flex-col fixed h-full z-20 no-print">
       <div className="p-6">
         <div className="flex items-center gap-2 font-bold text-lg tracking-tight text-indigo-950">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-indigo-200 shadow-lg">
@@ -192,16 +189,6 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('compliance'); }}
           onClick={() => onTabChange('compliance')}
           subsections={SECTIONS.compliance}
-        />
-        <NavItem 
-          id="licensing" 
-          icon={CreditCard} 
-          label="Licensing" 
-          isActive={activeTab === 'licensing'} 
-          isExpanded={expanded.licensing}
-          onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('licensing'); }}
-          onClick={() => onTabChange('licensing')}
-          subsections={SECTIONS.licensing}
         />
         <NavItem 
           id="audit" 

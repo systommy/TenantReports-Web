@@ -4,6 +4,7 @@ import DataTable from '../tables/DataTable'
 import StatusPill from '../common/StatusPill'
 import DoughnutChart from '../charts/DoughnutChart'
 import { formatDate } from '../../utils/format'
+import { Info } from 'lucide-react'
 import type { ComplianceOverview as ComplianceOverviewData } from '../../processing/types'
 
 const columns: ColumnDef<Record<string, unknown>, unknown>[] = [
@@ -17,7 +18,7 @@ const columns: ColumnDef<Record<string, unknown>, unknown>[] = [
       return <StatusPill label={v} intent={intent} />;
     },
   },
-  { accessorKey: 'OwnerType', header: 'Owner' },
+  { accessorKey: 'UserPrincipalName', header: 'User' },
   {
     accessorKey: 'LastSyncDateTime', header: 'Last Sync',
     cell: ({ getValue }) => formatDate(getValue() as string),
@@ -39,7 +40,14 @@ export default function ComplianceOverview({ data, devices }: { data: Compliance
   const os = useMemo(() => countBy(devices, 'OperatingSystem'), [devices])
   const ownership = useMemo(() => countBy(devices, 'OwnerType'), [devices])
 
-  if (isEmpty) return null
+  if (isEmpty) {
+    return (
+        <div className="bg-gray-50 border border-dashed border-gray-200 rounded-lg p-6 flex items-center gap-3 text-gray-500">
+            <Info size={20} />
+            <span className="text-sm font-medium">No device compliance data found.</span>
+        </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
