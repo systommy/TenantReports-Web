@@ -3,7 +3,18 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Lege
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
+const COLORS = [
+  '#6366f1', // Indigo
+  '#10b981', // Emerald
+  '#f59e0b', // Amber
+  '#ef4444', // Red
+  '#8b5cf6', // Violet
+  '#ec4899', // Pink
+  '#06b6d4', // Cyan
+  '#84cc16', // Lime
+  '#f97316', // Orange
+  '#14b8a6', // Teal
+]
 
 interface Props {
   labels: string[]
@@ -23,15 +34,26 @@ export default function BarChart({ labels, datasets, title, horizontal = false }
             datasets: datasets.map((ds, i) => ({
               label: ds.label,
               data: ds.values,
-              backgroundColor: COLORS[i % COLORS.length],
+              backgroundColor: datasets.length === 1 
+                ? labels.map((_, j) => COLORS[j % COLORS.length]) 
+                : COLORS[i % COLORS.length],
+              borderRadius: 4, // Add slight rounding for better visuals
             })),
           }}
           options={{
             responsive: true,
             maintainAspectRatio: false,
             indexAxis: horizontal ? 'y' : 'x',
-            plugins: { legend: { display: datasets.length > 1, position: 'bottom' } },
-            scales: { y: { beginAtZero: true } },
+            plugins: { 
+              legend: { 
+                display: datasets.length > 1, // Hide legend if only 1 dataset (since bars are self-labeled by axis)
+                position: 'bottom' 
+              } 
+            },
+            scales: { 
+              y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+              x: { grid: { display: false } }
+            },
           }}
         />
       </div>
