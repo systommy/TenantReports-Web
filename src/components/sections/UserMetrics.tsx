@@ -33,7 +33,22 @@ const columns: ColumnDef<any, unknown>[] = [
       />
     ),
   },
-  { accessorKey: 'City', header: 'City' },
+  {
+    accessorKey: 'MfaStatus',
+    header: 'MFA',
+    cell: ({ getValue }) => {
+      const v = String(getValue() ?? '');
+      const lower = v.toLowerCase();
+      const isRegistered = lower.includes('registered') && !lower.includes('not');
+      const isNotRegistered = lower.includes('not registered');
+      return (
+        <StatusPill 
+          label={v || 'Unknown'} 
+          intent={isRegistered ? 'success' : isNotRegistered ? 'danger' : 'neutral'} 
+        />
+      );
+    },
+  },
 ];
 
 export default function UserMetrics({ data, details }: UserMetricsProps) {

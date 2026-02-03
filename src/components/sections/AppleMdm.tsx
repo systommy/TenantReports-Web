@@ -12,9 +12,22 @@ const columns: ColumnDef<Cert, unknown>[] = [
   { accessorKey: 'apple_id', header: 'Apple ID' },
   {
     accessorKey: 'status', header: 'Status',
-    cell: ({ getValue }) => {
-        const v = (getValue() as string)?.toLowerCase();
-        const intent = v === 'active' ? 'success' : 'warning';
+    cell: ({ getValue, row }) => {
+        const v = (getValue() as string)?.toLowerCase() ?? '';
+        const daysLeft = row.original.days_left;
+        
+        let intent: 'success' | 'warning' | 'danger' | 'neutral' = 'neutral';
+        
+        if (v.includes('expired')) {
+            intent = 'danger';
+        } else if (v.includes('expiring') || (daysLeft !== null && daysLeft < 30)) {
+            intent = 'warning';
+        } else if (v.includes('valid') || v.includes('active')) {
+            intent = 'success';
+        } else {
+            intent = 'warning'; // Default fallback for unknown statuses which might be risky
+        }
+        
         return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
     }
   },

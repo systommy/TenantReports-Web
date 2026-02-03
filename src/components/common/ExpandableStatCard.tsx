@@ -9,6 +9,8 @@ interface ExpandableStatCardProps {
   trendLabel?: string;
   icon?: React.ElementType;
   children?: React.ReactNode;
+  onClick?: () => void;
+  isSelected?: boolean;
 }
 
 export default function ExpandableStatCard({ 
@@ -18,7 +20,9 @@ export default function ExpandableStatCard({
   intent = 'neutral', 
   trendLabel, 
   icon: Icon, 
-  children 
+  children,
+  onClick,
+  isSelected
 }: ExpandableStatCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   
@@ -29,15 +33,28 @@ export default function ExpandableStatCard({
     warning: 'text-amber-700 bg-amber-50 border-amber-100'
   }[intent] || 'text-gray-900 bg-gray-50';
 
+  const handleClick = (e: React.MouseEvent) => {
+      if (onClick) {
+          e.stopPropagation();
+          onClick();
+      } else if (children) {
+          setIsOpen(!isOpen);
+      }
+  };
+
+  const activeClass = isSelected 
+    ? 'ring-2 ring-indigo-500 border-indigo-500 shadow-md' 
+    : isOpen 
+        ? 'shadow-lg border-indigo-200 ring-1 ring-indigo-50 relative z-10'
+        : 'border-gray-100 shadow-sm hover:shadow-md';
+
   return (
     <div 
-      className={`bg-white rounded-xl border transition-all duration-300 overflow-hidden ${
-        isOpen ? 'shadow-lg border-indigo-200 ring-1 ring-indigo-50 relative z-10' : 'border-gray-100 shadow-sm hover:shadow-md'
-      }`}
+      className={`bg-white rounded-xl border transition-all duration-300 overflow-hidden ${activeClass}`}
     >
       <div 
-        className={`p-5 cursor-pointer ${children ? '' : 'cursor-default'}`}
-        onClick={() => children && setIsOpen(!isOpen)}
+        className={`p-5 ${children || onClick ? 'cursor-pointer hover:bg-gray-50/50' : 'cursor-default'}`}
+        onClick={handleClick}
       >
         <div className="flex justify-between items-start mb-2">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
@@ -61,7 +78,10 @@ export default function ExpandableStatCard({
 
       {/* Expanded Content */}
       {isOpen && children && (
-         <div className="px-5 pb-5 pt-0 border-t border-gray-50 bg-gray-50/30 animate-in slide-in-from-top-1">
+         <div 
+           className="px-5 pb-5 pt-0 border-t border-gray-50 bg-gray-50/30 animate-in slide-in-from-top-1"
+           onClick={(e) => e.stopPropagation()}
+         >
            <div className="pt-3 text-sm text-gray-600 space-y-2">
              {children}
            </div>

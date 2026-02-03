@@ -14,11 +14,15 @@ function toArray(source: unknown): unknown[] {
 }
 
 function extractSku(raw: string): string {
-    const match = raw.match(/SkuName=([^,\]]+)/)
-    return match ? match[1] : raw
+    if (raw.includes('SkuName=')) {
+        const match = raw.match(/SkuName=([^,\]]+)/)
+        return match ? match[1] : raw
+    }
+    return raw
 }
 
-export function processLicenseOverview(data: Record<string, unknown>): LicenseOverview {
+export function processLicenseOverview(data: Record<string, unknown>): LicenseOverview | null {
+  if (!('LicenseAllocation' in data)) return null
   const alloc = getDict(data, 'LicenseAllocation')
   const summary = getDict(alloc, 'Summary')
   const licenses = toArray(alloc.Licenses)
@@ -49,7 +53,8 @@ export function processLicenseOverview(data: Record<string, unknown>): LicenseOv
   }
 }
 
-export function processLicenseChanges(data: Record<string, unknown>): LicenseChange[] {
+export function processLicenseChanges(data: Record<string, unknown>): LicenseChange[] | null {
+  if (!('LicenseChangeAudit' in data)) return null
   let raw = data.LicenseChangeAudit
   if (raw && typeof raw === 'object' && 'Changes' in raw) {
       raw = (raw as Record<string, unknown>).Changes

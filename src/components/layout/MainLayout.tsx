@@ -1,6 +1,7 @@
 import React from 'react';
 import Sidebar, { type TabId } from './Sidebar';
 import Header from './Header';
+import type { ProcessedReport } from '../../processing/types';
 
 interface MainLayoutProps {
   tenantName: string;
@@ -10,6 +11,7 @@ interface MainLayoutProps {
   children: React.ReactNode;
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
+  report: ProcessedReport;
 }
 
 export default function MainLayout({ 
@@ -19,12 +21,13 @@ export default function MainLayout({
   exportButton, 
   children,
   activeTab,
-  onTabChange 
+  onTabChange,
+  report
 }: MainLayoutProps) {
   
   return (
     <div className="flex h-full min-h-screen bg-gray-50/50 font-sans">
-      <Sidebar activeTab={activeTab} onTabChange={onTabChange} />
+      <Sidebar activeTab={activeTab} onTabChange={onTabChange} report={report} />
       
       <main className="flex-1 ml-64 flex flex-col">
         <Header 

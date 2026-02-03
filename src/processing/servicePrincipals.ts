@@ -1,5 +1,5 @@
 import { formatDate } from '../utils/format'
-import type { ServicePrincipals, AppCredentialExpiry } from './types'
+import type { ServicePrincipals, AppRegistrationData, AppRegistrationSummary, AppRegistrationCredential } from './types'
 
 function getDict(source: Record<string, unknown>, key: string): Record<string, unknown> {
   const value = source[key]
@@ -9,7 +9,8 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
 
 const RISK_ORDER: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1, '': 0 }
 
-export function processServicePrincipals(data: Record<string, unknown>): ServicePrincipals {
+export function processServicePrincipals(data: Record<string, unknown>): ServicePrincipals | null {
+  if (!('ServicePrincipals' in data)) return null
   const principals = getDict(data, 'ServicePrincipals')
   const allPermissions = Array.isArray(principals.AllPermissions) ? principals.AllPermissions : []
 
@@ -84,22 +85,44 @@ export function processServicePrincipals(data: Record<string, unknown>): Service
   }
 }
 
-export function processAppCredentials(data: Record<string, unknown>): AppCredentialExpiry[] {
-  const expiry = Array.isArray(data.AppRegistrationExpiry) ? data.AppRegistrationExpiry : []
-  const rows: AppCredentialExpiry[] = []
+export function processAppCredentials(data: Record<string, unknown>): AppRegistrationData | null {
+  if (!('AppRegistrationExpiry' in data)) return null
+  const root = getDict(data, 'AppRegistrationExpiry')
+  const summaryRaw = getDict(root, 'Summary')
+  const credentialsRaw = Array.isArray(root.Credentials) ? root.Credentials : []
 
-  for (const item of expiry) {
+  const summary: AppRegistrationSummary = {
+    TenantId: (summaryRaw.TenantId as string) ?? '',
+    ReportGeneratedDate: (summaryRaw.ReportGeneratedDate as string) ?? '',
+    DaysUntilExpiryThreshold: (summaryRaw.DaysUntilExpiryThreshold as number) ?? 0,
+    TotalCredentials: (summaryRaw.TotalCredentials as number) ?? 0,
+    ExpiredCount: (summaryRaw.ExpiredCount as number) ?? 0,
+    ExpiringSoonCount: (summaryRaw.ExpiringSoonCount as number) ?? 0,
+    ValidCount: (summaryRaw.ValidCount as number) ?? 0,
+    AppsWithExpiredOrExpiring: (summaryRaw.AppsWithExpiredOrExpiring as number) ?? 0,
+  }
+
+  const credentials: AppRegistrationCredential[] = []
+
+  for (const item of credentialsRaw) {
     if (typeof item !== 'object' || item === null) continue
     const e = item as Record<string, unknown>
-    rows.push({
-      app_name: (e.AppName as string) ?? (e.DisplayName as string) ?? 'Unknown',
-      app_id: (e.AppId as string) ?? '',
-      key_id: (e.KeyId as string) ?? '',
-      type: (e.Type as string) ?? 'Secret',
-      end_date: formatDate((e.EndDate as string) ?? null),
-      days_until_expiry: (e.DaysUntilExpiry as number) ?? 0,
-      status: (e.Status as string) ?? 'Unknown',
+    credentials.push({
+      AppDisplayName: (e.AppDisplayName as string) ?? '',
+      AppId: (e.AppId as string) ?? '',
+      ObjectId: (e.ObjectId as string) ?? '',
+      CredentialType: (e.CredentialType as string) ?? '',
+      CredentialName: (e.CredentialName as string) ?? null,
+      KeyId: (e.KeyId as string) ?? '',
+      StartDate: (e.StartDate as string) ?? '',
+      EndDate: (e.EndDate as string) ?? '',
+      DaysRemaining: (e.DaysRemaining as number) ?? 0,
+      Status: (e.Status as string) ?? '',
     })
   }
-  return rows
+
+  return {
+    summary,
+    credentials,
+  }
 }

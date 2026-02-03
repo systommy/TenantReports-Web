@@ -41,7 +41,8 @@ function processDevices(data: Record<string, unknown>): Record<string, unknown>[
   })
 }
 
-export function processComplianceOverview(data: Record<string, unknown>): ComplianceOverview {
+export function processComplianceOverview(data: Record<string, unknown>): ComplianceOverview | null {
+  if (!('Intune' in data)) return null
   const intune = getDict(data, 'Intune')
   const devices = processDevices(data)
   
@@ -51,11 +52,13 @@ export function processComplianceOverview(data: Record<string, unknown>): Compli
   }
 }
 
-export function processDeviceDetails(data: Record<string, unknown>): Record<string, unknown>[] {
+export function processDeviceDetails(data: Record<string, unknown>): Record<string, unknown>[] | null {
+  if (!('Intune' in data)) return null
   return processDevices(data)
 }
 
-export function processSharedMailboxCompliance(data: Record<string, unknown>): SharedMailbox[] {
+export function processSharedMailboxCompliance(data: Record<string, unknown>): SharedMailbox[] | null {
+  if (!('SharedMailboxCompliance' in data)) return null
   let raw = data.SharedMailboxCompliance
   // Handle nested structure from some JSON versions
   if (raw && typeof raw === 'object' && 'Mailboxes' in raw) {

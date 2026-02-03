@@ -6,7 +6,8 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
   return value as Record<string, unknown>
 }
 
-export function processUsersSummary(data: Record<string, unknown>): UsersSummary {
+export function processUsersSummary(data: Record<string, unknown>): UsersSummary | null {
+  if (!('Users' in data)) return null
   const users = getDict(data, 'Users')
   const summary = getDict(users, 'Summary')
   return {
@@ -25,7 +26,8 @@ export function processUsersSummary(data: Record<string, unknown>): UsersSummary
   }
 }
 
-export function processUserDetails(data: Record<string, unknown>): Record<string, unknown>[] {
+export function processUserDetails(data: Record<string, unknown>): Record<string, unknown>[] | null {
+  if (!('Users' in data)) return null
   const users = getDict(data, 'Users')
   const details = Array.isArray(users.UserDetails) ? users.UserDetails : []
   const result: Record<string, unknown>[] = []

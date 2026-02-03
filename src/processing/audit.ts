@@ -1,9 +1,20 @@
 import { formatDate } from '../utils/format'
 import type { AuditEvents } from './types'
 
-export function processAuditEvents(data: Record<string, unknown>): AuditEvents {
-  const groupAudit = Array.isArray(data.GroupMembershipAudit) ? data.GroupMembershipAudit : []
-  const userAudit = Array.isArray(data.UserCreationAudit) ? data.UserCreationAudit : []
+export function processAuditEvents(data: Record<string, unknown>): AuditEvents | null {
+  if (!('GroupMembershipAudit' in data) && !('UserCreationAudit' in data)) return null
+
+  // Helper to extract Details array whether it's the new object structure or old array structure
+  const getDetails = (source: unknown) => {
+      if (Array.isArray(source)) return source;
+      if (typeof source === 'object' && source !== null && 'Details' in source) {
+          return Array.isArray((source as any).Details) ? (source as any).Details : [];
+      }
+      return [];
+  };
+
+  const groupAudit = getDetails(data.GroupMembershipAudit);
+  const userAudit = getDetails(data.UserCreationAudit);
 
   const groupEvents: AuditEvents['group_events'] = []
   const groupActivities: Record<string, number> = {}

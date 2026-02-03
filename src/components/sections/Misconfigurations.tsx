@@ -48,12 +48,14 @@ export default function Misconfigurations({ data }: Props) {
         return (
           <div 
             key={id}
-            onClick={() => toggleExpand(id)}
-            className={`bg-white rounded-lg border shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ${
+            className={`bg-white rounded-lg border shadow-sm transition-all duration-200 hover:shadow-md ${
               isConfigured ? 'border-l-4 border-l-emerald-500 border-gray-200' : 'border-l-4 border-l-rose-500 border-rose-100'
             }`}
           >
-            <div className="p-4">
+            <div 
+              className="p-4 cursor-pointer hover:bg-gray-50/50 rounded-t-lg transition-colors"
+              onClick={() => toggleExpand(id)}
+            >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1.5">
@@ -75,7 +77,10 @@ export default function Misconfigurations({ data }: Props) {
             </div>
 
             {isExpanded && (
-              <div className="px-4 pb-4 pt-0 text-sm animate-in fade-in slide-in-from-top-1 duration-200">
+              <div 
+                className="px-4 pb-4 pt-0 text-sm animate-in fade-in slide-in-from-top-1 duration-200"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="pt-3 border-t border-gray-100 space-y-3">
                   <div>
                     <span className="font-semibold text-gray-900 block text-xs uppercase mb-1">Description</span>

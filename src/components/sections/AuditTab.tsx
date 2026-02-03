@@ -17,11 +17,14 @@ export default function AuditTab({ data }: { data: ProcessedReport }) {
 
   return (
     <div className="space-y-8">
+      {data.audit && (
       <AuditEvents data={data.audit} />
+      )}
 
+      {changes && (
       <div id="license-changes" className="space-y-4">
           <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Recent License Changes</h3>
-          {changes && changes.length > 0 ? (
+          {changes.length > 0 ? (
             <DataTable 
               title="License Change Log"
               columns={changeColumns} 
@@ -35,6 +38,7 @@ export default function AuditTab({ data }: { data: ProcessedReport }) {
             </div>
           )}
       </div>
+      )}
     </div>
   );
 }

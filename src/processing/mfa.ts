@@ -26,10 +26,12 @@ const METHOD_FIELDS: Record<string, string> = {
   SecurityQuestions: 'Security Questions',
 }
 
-export function processMfaCoverage(data: Record<string, unknown>): MfaCoverage {
+export function processMfaCoverage(data: Record<string, unknown>): MfaCoverage | null {
+  if (!('Users' in data)) return null
   const users = getDict(data, 'Users')
   const details = Array.isArray(users.UserDetails) ? users.UserDetails : []
   const summary = processUsersSummary(data)
+  if (!summary) return null
 
   const methodCounts: Record<string, number> = {}
   for (const friendly of Object.values(METHOD_FIELDS)) {

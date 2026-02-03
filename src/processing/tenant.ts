@@ -7,7 +7,8 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
   return value as Record<string, unknown>
 }
 
-export function processTenantOverview(data: Record<string, unknown>): TenantOverview {
+export function processTenantOverview(data: Record<string, unknown>): TenantOverview | null {
+  if (!('TenantInfo' in data)) return null
   const tenantInfo = getDict(data, 'TenantInfo')
   const summary = getDict(tenantInfo, 'Summary')
   const directoryStats = getDict(tenantInfo, 'DirectoryStatistics')
@@ -24,7 +25,8 @@ export function processTenantOverview(data: Record<string, unknown>): TenantOver
   }
 }
 
-export function processDomains(data: Record<string, unknown>): Domain[] {
+export function processDomains(data: Record<string, unknown>): Domain[] | null {
+  if (!('TenantInfo' in data)) return null
   const tenantInfo = getDict(data, 'TenantInfo')
   const domains = Array.isArray(tenantInfo.AllDomains) ? tenantInfo.AllDomains : []
   
@@ -43,20 +45,29 @@ export function processDomains(data: Record<string, unknown>): Domain[] {
   return domainRows
 }
 
-export function processTenantConfiguration(data: Record<string, unknown>): TenantConfiguration {
+export function processTenantConfiguration(data: Record<string, unknown>): TenantConfiguration | null {
+  if (!('TenantConfiguration' in data)) return null
   const config = getDict(data, 'TenantConfiguration')
   const summary = getDict(config, 'Summary')
   const settings = Array.isArray(config.Settings) ? config.Settings : []
 
-  const rows = settings.map((item: any) => ({
-    category: item.Category,
-    name: item.SettingName,
-    current_value: item.CurrentValue,
-    recommended_value: item.RecommendedValue,
-    risk_level: item.RiskLevel,
-    description: item.Description,
-    recommendation: item.Recommendation,
-  }))
+  const rows = settings.map((item: any) => {
+    let recommended = item.RecommendedValue;
+    // Special case: 'Restricted access (most restrictive)' is more secure than 'Limited access', so treat it as compliant.
+    if (item.SettingName === 'Guest user access level' && item.CurrentValue === 'Restricted access (most restrictive)') {
+        recommended = 'Restricted access (most restrictive)';
+    }
+
+    return {
+      category: item.Category,
+      name: item.SettingName,
+      current_value: item.CurrentValue,
+      recommended_value: recommended,
+      risk_level: item.RiskLevel,
+      description: item.Description,
+      recommendation: item.Recommendation,
+    };
+  })
 
   return {
     summary: {

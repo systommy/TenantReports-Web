@@ -3,6 +3,7 @@ import DataTable from '../tables/DataTable'
 import StatusPill from '../common/StatusPill'
 import { FileText, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 import type { ConditionalAccess as ConditionalAccessData, ConditionalAccessPolicy } from '../../processing/types'
+import { useState } from 'react'
 
 function stringify(val: unknown): string {
   if (val == null) return '—'
@@ -11,9 +12,32 @@ function stringify(val: unknown): string {
   return String(val)
 }
 
-function MetricCard({ title, value, colorClass, bgClass, icon: Icon }: { title: string; value: number | string; colorClass: string; bgClass: string; icon: any }) {
+function MetricCard({ 
+    title, 
+    value, 
+    colorClass, 
+    bgClass, 
+    icon: Icon,
+    onClick,
+    isSelected
+}: { 
+    title: string; 
+    value: number | string; 
+    colorClass: string; 
+    bgClass: string; 
+    icon: any;
+    onClick: () => void;
+    isSelected: boolean;
+}) {
     return (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex items-start justify-between group hover:border-indigo-200 transition-colors">
+        <div 
+            onClick={onClick}
+            className={`bg-white rounded-xl border p-4 shadow-sm flex items-start justify-between group cursor-pointer transition-all duration-200 ${
+                isSelected 
+                    ? 'ring-2 ring-indigo-500 border-indigo-500 shadow-md' 
+                    : 'border-gray-200 hover:border-indigo-200 hover:shadow-md'
+            }`}
+        >
             <div>
                 <div className="text-sm font-medium text-gray-500 mb-1">{title}</div>
                 <div className={`text-2xl font-bold ${colorClass}`}>{value}</div>
@@ -27,6 +51,20 @@ function MetricCard({ title, value, colorClass, bgClass, icon: Icon }: { title: 
 
 export default function ConditionalAccess({ data }: { data: ConditionalAccessData }) {
   const { summary } = data
+  const [filter, setFilter] = useState<'all' | 'enabled' | 'disabled' | 'report_only'>('all');
+
+  const handleFilter = (type: 'all' | 'enabled' | 'disabled' | 'report_only') => {
+      setFilter(prev => prev === type ? 'all' : type);
+  };
+
+  const filteredPolicies = data.policies.filter(p => {
+      if (filter === 'all') return true;
+      const state = (p.state || '').toLowerCase();
+      if (filter === 'enabled') return state === 'enabled';
+      if (filter === 'disabled') return state === 'disabled';
+      if (filter === 'report_only') return state.includes('enabledforreporting') || state.includes('reportonly');
+      return true;
+  });
 
   const columns: ColumnDef<ConditionalAccessPolicy, unknown>[] = [
     { accessorKey: 'name', header: 'Name' },
@@ -70,25 +108,53 @@ export default function ConditionalAccess({ data }: { data: ConditionalAccessDat
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Total Policies" value={summary.total_policies} colorClass="text-gray-900" bgClass="bg-gray-100" icon={FileText} />
-        <MetricCard title="Enabled" value={summary.enabled} colorClass="text-emerald-600" bgClass="bg-emerald-50" icon={CheckCircle} />
-        <MetricCard title="Disabled" value={summary.disabled} colorClass="text-rose-600" bgClass="bg-rose-50" icon={XCircle} />
-        <MetricCard title="Report Only" value={summary.report_only} colorClass="text-amber-600" bgClass="bg-amber-50" icon={AlertCircle} />
+        <MetricCard 
+            title="Total Policies" 
+            value={summary.total_policies} 
+            colorClass="text-gray-900" 
+            bgClass="bg-gray-100" 
+            icon={FileText} 
+            onClick={() => handleFilter('all')}
+            isSelected={filter === 'all'}
+        />
+        <MetricCard 
+            title="Enabled" 
+            value={summary.enabled} 
+            colorClass="text-emerald-600" 
+            bgClass="bg-emerald-50" 
+            icon={CheckCircle} 
+            onClick={() => handleFilter('enabled')}
+            isSelected={filter === 'enabled'}
+        />
+        <MetricCard 
+            title="Disabled" 
+            value={summary.disabled} 
+            colorClass="text-rose-600" 
+            bgClass="bg-rose-50" 
+            icon={XCircle} 
+            onClick={() => handleFilter('disabled')}
+            isSelected={filter === 'disabled'}
+        />
+        <MetricCard 
+            title="Report Only" 
+            value={summary.report_only} 
+            colorClass="text-amber-600" 
+            bgClass="bg-amber-50" 
+            icon={AlertCircle} 
+            onClick={() => handleFilter('report_only')}
+            isSelected={filter === 'report_only'}
+        />
       </div>
       <DataTable 
-        title="Policy List"
+        title={`Policy List ${filter !== 'all' ? `(${filter})` : ''}`}
         columns={columns} 
-        data={data.policies} 
+        data={filteredPolicies} 
         renderSubComponent={({ row }) => (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 text-sm">
               <div className="space-y-1">
-                <span className="font-semibold text-gray-500 text-xs uppercase block">Grant Controls</span>
-                <p className="text-gray-700">{stringify(row.grant_controls)}</p>
-              </div>
-              <div className="space-y-1">
-                <span className="font-semibold text-gray-500 text-xs uppercase block">Session Controls</span>
-                <p className="text-gray-700">{stringify(row.session_controls)}</p>
+                <span className="font-semibold text-gray-500 text-xs uppercase block">Grant Operator</span>
+                <p className="text-gray-700">{stringify(row.grant_operator)}</p>
               </div>
               <div className="space-y-1">
                 <span className="font-semibold text-gray-500 text-xs uppercase block">Platforms</span>

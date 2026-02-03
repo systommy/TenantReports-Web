@@ -7,7 +7,8 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
   return value as Record<string, unknown>
 }
 
-export function processConditionalAccess(data: Record<string, unknown>): ConditionalAccess {
+export function processConditionalAccess(data: Record<string, unknown>): ConditionalAccess | null {
+  if (!('ConditionalAccess' in data)) return null
   const caData = getDict(data, 'ConditionalAccess')
   const summary = getDict(caData, 'Summary')
   const policies = Array.isArray(caData.PolicyAnalysis) ? caData.PolicyAnalysis : []
@@ -23,11 +24,6 @@ export function processConditionalAccess(data: Record<string, unknown>): Conditi
       blocks_access: Boolean(p.BlocksAccess),
       policy_id: (p.PolicyId as string) ?? null,
       policy_scenario: (p.PolicyScenario as string) ?? null,
-      risk_level: Array.isArray(p.RiskLevel) ? p.RiskLevel : [],
-      risk_score: (p.RiskScore as number) ?? null,
-      risk_factors: p.RiskFactors ?? null,
-      grant_controls: p.GrantControls ?? null,
-      session_controls: p.SessionControls ?? null,
       grant_operator: (p.GrantOperator as string) ?? null,
       requires_compliant_device: Boolean(p.RequiresCompliantDevice),
       requires_hybrid_join: Boolean(p.RequiresHybridJoin),
@@ -38,17 +34,16 @@ export function processConditionalAccess(data: Record<string, unknown>): Conditi
       covers_guest_users: Boolean(p.CoversGuestUsers),
       has_exclusions: Boolean(p.HasExclusions),
       is_high_value_app_protection: Boolean(p.IsHighValueAppProtection),
-      included_users: p.IncludedUsers ?? null,
-      excluded_users: p.ExcludedUsers ?? null,
-      included_groups: p.IncludedGroups ?? null,
-      excluded_groups: p.ExcludedGroups ?? null,
-      included_applications: p.IncludedApplications ?? null,
-      excluded_applications: p.ExcludedApplications ?? null,
-      included_locations: p.IncludedLocations ?? null,
-      excluded_locations: p.ExcludedLocations ?? null,
-      platforms: p.Platforms ?? null,
-      client_app_types: p.ClientAppTypes ?? null,
-      sign_in_risk_levels: p.SignInRiskLevels ?? null,
+      included_users: (p.IncludedUsers as string) ?? null,
+      excluded_users: (p.ExcludedUsers as string) ?? null,
+      included_groups: (p.IncludedGroups as string) ?? null,
+      excluded_groups: (p.ExcludedGroups as string) ?? null,
+      included_applications: (p.IncludedApplications as string) ?? null,
+      excluded_applications: (p.ExcludedApplications as string) ?? null,
+      included_locations: (p.IncludedLocations as string) ?? null,
+      excluded_locations: (p.ExcludedLocations as string) ?? null,
+      platforms: (p.Platforms as string) ?? null,
+      client_app_types: (p.ClientAppTypes as string) ?? null,
       created_date: formatDate(p.CreatedDateTime as string | null),
       modified_date: formatDate(p.ModifiedDateTime as string | null),
     })

@@ -37,25 +37,26 @@ export default function ReportNav({ report }: { report: ProcessedReport }) {
 
   const sections = [
     // Overview Group
-    { id: 'tenant-overview', label: 'Tenant', visible: true },
-    { id: 'user-metrics', label: 'Users', visible: true },
-    { id: 'compliance-overview', label: 'Compliance', visible: Object.keys(report.compliance?.intune || {}).length > 0 },
-    { id: 'security-scores', label: 'Secure Score', visible: true },
-    { id: 'mfa-coverage', label: 'MFA', visible: true },
-    { id: 'license-overview', label: 'Licenses', visible: true },
-    { id: 'expiring-credentials', label: 'Expiring Creds', visible: report.servicePrincipals?.expiring_credentials?.length > 0 },
+    { id: 'tenant-overview', label: 'Tenant', visible: report.tenant !== null },
+    { id: 'user-metrics', label: 'Users', visible: report.users !== null },
+    { id: 'compliance-overview', label: 'Compliance', visible: report.compliance !== null },
+    { id: 'security-scores', label: 'Secure Score', visible: report.security !== null },
+    { id: 'mfa-coverage', label: 'MFA', visible: report.mfa !== null },
+    { id: 'license-overview', label: 'Licenses', visible: report.licenses !== null },
+    { id: 'expiring-credentials', label: 'Expiring Creds', visible: (report.servicePrincipals?.expiring_credentials?.length ?? 0) > 0 },
 
     // Operations Group
-    { id: 'conditional-access', label: 'Cond. Access', visible: report.conditionalAccess?.policies?.length > 0 },
-    { id: 'apple-mdm', label: 'Apple MDM', visible: report.appleMdm?.certificates?.length > 0 },
-    { id: 'service-principals', label: 'Service Principals', visible: report.servicePrincipals?.all_apps?.length > 0 },
-    { id: 'privileged-access', label: 'Privileged Access', visible: report.privileged?.assignments?.length > 0 },
-    { id: 'sentinel-incidents', label: 'Sentinel', visible: report.sentinel?.total > 0 },
-    { id: 'defender-summary', label: 'Defender', visible: Object.keys(report.defender?.summary || {}).length > 0 },
-    { id: 'risky-users', label: 'Risky Users', visible: report.riskyUsers?.length > 0 },
-    { id: 'mailbox-permissions', label: 'Mailbox Perms', visible: report.mailbox?.permissions?.length > 0 },
-    { id: 'calendar-permissions', label: 'Calendar Perms', visible: report.calendar?.permissions?.length > 0 },
-    { id: 'audit-events', label: 'Audit Events', visible: (report.audit?.group_events?.length > 0 || report.audit?.user_events?.length > 0) },
+    { id: 'conditional-access', label: 'Cond. Access', visible: report.conditionalAccess !== null },
+    { id: 'apple-mdm', label: 'Apple MDM', visible: report.appleMdm !== null },
+    { id: 'app-registration-secrets', label: 'App Secrets', visible: report.appCredentials !== null },
+    { id: 'service-principals', label: 'Service Principals', visible: report.servicePrincipals !== null },
+    { id: 'privileged-access', label: 'Privileged Access', visible: report.privileged !== null },
+    { id: 'defender-incidents', label: 'Defender Incidents', visible: report.defenderIncidents !== null },
+    { id: 'defender-summary', label: 'Defender', visible: report.defender !== null },
+    { id: 'risky-users', label: 'Risky Users', visible: report.riskyUsers !== null },
+    { id: 'mailbox-permissions', label: 'Mailbox Perms', visible: report.mailbox !== null },
+    { id: 'calendar-permissions', label: 'Calendar Perms', visible: report.calendar !== null },
+    { id: 'audit-events', label: 'Audit Events', visible: report.audit !== null },
   ]
 
   return (

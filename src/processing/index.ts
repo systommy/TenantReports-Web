@@ -6,7 +6,7 @@ import { processSecurityScores } from './secureScore'
 import { processLicenseOverview, processLicenseChanges } from './licenses'
 import { processConditionalAccess } from './conditionalAccess'
 import { processServicePrincipals, processAppCredentials } from './servicePrincipals'
-import { processSentinelIncidents } from './sentinel'
+import { processDefenderIncidents } from './defenderIncidents'
 import { processDefenderSummary } from './defender'
 import { processMailboxPermissions, processCalendarPermissions } from './permissions'
 import { processAuditEvents } from './audit'
@@ -29,7 +29,7 @@ export function processAll(data: Record<string, unknown>): ProcessedReport {
     conditionalAccess: processConditionalAccess(data),
     servicePrincipals: processServicePrincipals(data),
     appCredentials: processAppCredentials(data),
-    sentinel: processSentinelIncidents(data),
+    defenderIncidents: processDefenderIncidents(data),
     defender: processDefenderSummary(data),
     mailbox: processMailboxPermissions(data),
     calendar: processCalendarPermissions(data),
@@ -50,7 +50,7 @@ export { processSecurityScores } from './secureScore'
 export { processLicenseOverview, processLicenseChanges } from './licenses'
 export { processConditionalAccess } from './conditionalAccess'
 export { processServicePrincipals, processAppCredentials } from './servicePrincipals'
-export { processSentinelIncidents } from './sentinel'
+export { processDefenderIncidents } from './defenderIncidents'
 export { processDefenderSummary } from './defender'
 export { processMailboxPermissions, processCalendarPermissions } from './permissions'
 export { processAuditEvents } from './audit'

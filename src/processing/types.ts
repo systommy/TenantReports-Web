@@ -89,18 +89,17 @@ export interface ConditionalAccessPolicy {
   name: string | null; state: string | null
   requires_mfa: boolean; blocks_access: boolean
   policy_id: string | null; policy_scenario: string | null
-  risk_level: unknown[]; risk_score: number | null; risk_factors: unknown
-  grant_controls: unknown; session_controls: unknown; grant_operator: string | null
+  grant_operator: string | null
   requires_compliant_device: boolean; requires_hybrid_join: boolean
   requires_approved_app: boolean; requires_password_change: boolean
   covers_all_users: boolean; covers_all_apps: boolean
   covers_guest_users: boolean; has_exclusions: boolean
   is_high_value_app_protection: boolean
-  included_users: unknown; excluded_users: unknown
-  included_groups: unknown; excluded_groups: unknown
-  included_applications: unknown; excluded_applications: unknown
-  included_locations: unknown; excluded_locations: unknown
-  platforms: unknown; client_app_types: unknown; sign_in_risk_levels: unknown
+  included_users: string | null; excluded_users: string | null
+  included_groups: string | null; excluded_groups: string | null
+  included_applications: string | null; excluded_applications: string | null
+  included_locations: string | null; excluded_locations: string | null
+  platforms: string | null; client_app_types: string | null
   created_date: string; modified_date: string
 }
 
@@ -120,7 +119,7 @@ export interface ServicePrincipals {
   summary: { total: number; critical: number; high: number; medium: number; low: number }
 }
 
-export interface SentinelIncidents {
+export interface DefenderIncidents {
   incidents: { created: string; incident_id: string; title: string | null; severity: string; status: string; classification: string | null; comments: string }[]
   by_severity: Record<string, number>
   by_status: Record<string, number>
@@ -173,14 +172,33 @@ export interface LicenseChange {
   sku: string
 }
 
-export interface AppCredentialExpiry {
-  app_name: string
-  app_id: string
-  key_id: string
-  type: string
-  end_date: string
-  days_until_expiry: number
-  status: string
+export interface AppRegistrationSummary {
+  TenantId: string
+  ReportGeneratedDate: string
+  DaysUntilExpiryThreshold: number
+  TotalCredentials: number
+  ExpiredCount: number
+  ExpiringSoonCount: number
+  ValidCount: number
+  AppsWithExpiredOrExpiring: number
+}
+
+export interface AppRegistrationCredential {
+  AppDisplayName: string
+  AppId: string
+  ObjectId: string
+  CredentialType: string
+  CredentialName: string | null
+  KeyId: string
+  StartDate: string
+  EndDate: string
+  DaysRemaining: number
+  Status: string
+}
+
+export interface AppRegistrationData {
+  summary: AppRegistrationSummary | null
+  credentials: AppRegistrationCredential[]
 }
 
 export interface SharedMailbox {
@@ -192,27 +210,27 @@ export interface SharedMailbox {
 }
 
 export interface ProcessedReport {
-  tenant: TenantOverview
-  domains: Domain[]
-  configuration: TenantConfiguration
-  users: UsersSummary
-  userDetails: Record<string, unknown>[]
-  mfa: MfaCoverage
-  security: SecurityScores
-  licenses: LicenseOverview
-  licenseChanges: LicenseChange[]
-  conditionalAccess: ConditionalAccess
-  servicePrincipals: ServicePrincipals
-  appCredentials: AppCredentialExpiry[]
-  sentinel: SentinelIncidents
-  defender: DefenderSummary
-  mailbox: PermissionsSummary
-  calendar: PermissionsSummary
-  audit: AuditEvents
-  riskyUsers: RiskyUser[]
-  compliance: ComplianceOverview
-  sharedMailboxes: SharedMailbox[]
-  privileged: PrivilegedRoles
-  appleMdm: AppleMdm
-  deviceDetails: Record<string, unknown>[]
+  tenant: TenantOverview | null
+  domains: Domain[] | null
+  configuration: TenantConfiguration | null
+  users: UsersSummary | null
+  userDetails: Record<string, unknown>[] | null
+  mfa: MfaCoverage | null
+  security: SecurityScores | null
+  licenses: LicenseOverview | null
+  licenseChanges: LicenseChange[] | null
+  conditionalAccess: ConditionalAccess | null
+  servicePrincipals: ServicePrincipals | null
+  appCredentials: AppRegistrationData | null
+  defenderIncidents: DefenderIncidents | null
+  defender: DefenderSummary | null
+  mailbox: PermissionsSummary | null
+  calendar: PermissionsSummary | null
+  audit: AuditEvents | null
+  riskyUsers: RiskyUser[] | null
+  compliance: ComplianceOverview | null
+  sharedMailboxes: SharedMailbox[] | null
+  privileged: PrivilegedRoles | null
+  appleMdm: AppleMdm | null
+  deviceDetails: Record<string, unknown>[] | null
 }

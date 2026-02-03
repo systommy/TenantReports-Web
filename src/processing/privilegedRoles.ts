@@ -7,7 +7,8 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
   return value as Record<string, unknown>
 }
 
-export function processPrivilegedRoles(data: Record<string, unknown>): PrivilegedRoles {
+export function processPrivilegedRoles(data: Record<string, unknown>): PrivilegedRoles | null {
+  if (!('PrivilegedAccess' in data) && !('PrivilegedRoles' in data)) return null
   const legacyPrivAccess = getDict(data, 'PrivilegedAccess')
 
   let rolesData = getDict(data, 'PrivilegedRoles')

@@ -1,11 +1,11 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import StatusPill from '../common/StatusPill'
 import DataTable from '../tables/DataTable'
-import BarChart from '../charts/BarChart'
+import StatusPill from '../common/StatusPill'
+import type { DefenderIncidents as DefenderIncidentsData } from '../../processing/types'
 import { formatDate } from '../../utils/format'
-import type { SentinelIncidents as SentinelIncidentsData } from '../../processing/types'
+import BarChart from '../charts/BarChart'
 
-type Incident = SentinelIncidentsData['incidents'][number]
+type Incident = DefenderIncidentsData['incidents'][number]
 
 const columns: ColumnDef<Incident, unknown>[] = [
   { accessorKey: 'created', header: 'Created', cell: ({ getValue }) => formatDate(getValue() as string) },
@@ -29,12 +29,12 @@ const columns: ColumnDef<Incident, unknown>[] = [
   },
 ]
 
-export default function SentinelIncidents({ data }: { data: SentinelIncidentsData }) {
-  if (data.total === 0) return null
+export default function DefenderIncidents({ data }: { data: DefenderIncidentsData }) {
+  if (!data.incidents.length) return null
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Sentinel Incidents</h3>
+      <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Defender Incidents</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 h-64">
              <BarChart labels={Object.keys(data.by_severity)} datasets={[{ label: 'Incidents', values: Object.values(data.by_severity) }]} title="By Severity" />

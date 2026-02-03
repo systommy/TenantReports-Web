@@ -7,7 +7,8 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
   return value as Record<string, unknown>
 }
 
-export function processAppleMdm(data: Record<string, unknown>): AppleMdm {
+export function processAppleMdm(data: Record<string, unknown>): AppleMdm | null {
+  if (!('Apple' in data)) return null
   const apple = getDict(data, 'Apple')
   const allItems = Array.isArray(apple.AllItems) ? apple.AllItems : []
 

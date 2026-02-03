@@ -14,14 +14,15 @@ import BarChart from '../charts/BarChart';
 
 export default function IdentityTab({ data }: { data: ProcessedReport }) {
   // MFA Methods Chart Data
-  const mfaMethods = Object.entries(data.mfa.methods)
+  const mfaMethods = data.mfa ? Object.entries(data.mfa.methods)
     .filter(([, v]) => v > 0)
-    .map(([k, v]) => ({ label: k, value: v }));
+    .map(([k, v]) => ({ label: k, value: v })) : [];
 
   return (
     <div className="space-y-8">
       {/* Main Content Areas */}
       
+      {data.users && (
       <div id="user-directory" className="space-y-6">
         <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">User Directory</h3>
         
@@ -51,6 +52,7 @@ export default function IdentityTab({ data }: { data: ProcessedReport }) {
               </div>
           </ExpandableStatCard>
 
+          {data.mfa && (
           <ExpandableStatCard
             title="MFA Registration"
             value={pct(data.mfa.adoption_rate)}
@@ -70,6 +72,7 @@ export default function IdentityTab({ data }: { data: ProcessedReport }) {
                   </div>
               </div>
           </ExpandableStatCard>
+          )}
 
           <ExpandableStatCard
             title="Inactive Users"
@@ -84,15 +87,18 @@ export default function IdentityTab({ data }: { data: ProcessedReport }) {
           </ExpandableStatCard>
         </div>
 
-        <UserMetrics data={data.users} details={data.userDetails} />
+        <UserMetrics data={data.users} details={data.userDetails ?? []} />
       </div>
+      )}
 
+      {data.privileged && (
       <div id="privileged-access" className="space-y-4">
          <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Privileged Access</h3>
          <PrivilegedAccess data={data.privileged} />
       </div>
+      )}
 
-      {data.privileged.activations.length > 0 && (
+      {data.privileged && data.privileged.activations.length > 0 && (
         <div id="pim-activations" className="space-y-4">
           <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">PIM Activations</h3>
           <DataTable 
@@ -117,25 +123,33 @@ export default function IdentityTab({ data }: { data: ProcessedReport }) {
         </div>
       )}
 
+      {data.riskyUsers && (
       <div id="risky-users" className="space-y-4">
          <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Risky Users</h3>
          <RiskyUsers data={data.riskyUsers} />
       </div>
+      )}
 
+      {data.servicePrincipals && (
       <div id="service-principals" className="space-y-4">
          <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Service Principals & App Registrations</h3>
-         <ServicePrincipals data={data.servicePrincipals} appCredentials={data.appCredentials} />
+         <ServicePrincipals data={data.servicePrincipals} />
       </div>
+      )}
 
+      {data.mailbox && (
       <div id="mailbox-permissions" className="space-y-4">
         <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Mailbox Permissions</h3>
         <MailboxPermissions data={data.mailbox} />
       </div>
+      )}
 
+      {data.calendar && (
       <div id="calendar-permissions" className="space-y-4">
         <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Calendar Permissions</h3>
         <CalendarPermissions data={data.calendar} />
       </div>
+      )}
     </div>
   );
 }

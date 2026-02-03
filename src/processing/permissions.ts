@@ -6,7 +6,8 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
   return value as Record<string, unknown>
 }
 
-export function processMailboxPermissions(data: Record<string, unknown>): PermissionsSummary {
+export function processMailboxPermissions(data: Record<string, unknown>): PermissionsSummary | null {
+  if (!('MailboxPermissions' in data)) return null
   const mbData = getDict(data, 'MailboxPermissions')
   const perms = Array.isArray(mbData.MailboxPermissions) ? mbData.MailboxPermissions : []
 
@@ -44,7 +45,8 @@ export function processMailboxPermissions(data: Record<string, unknown>): Permis
   }
 }
 
-export function processCalendarPermissions(data: Record<string, unknown>): PermissionsSummary {
+export function processCalendarPermissions(data: Record<string, unknown>): PermissionsSummary | null {
+  if (!('CalendarPermissions' in data)) return null
   const calData = getDict(data, 'CalendarPermissions')
   const perms = Array.isArray(calData.CalendarPermissions) ? calData.CalendarPermissions : []
 

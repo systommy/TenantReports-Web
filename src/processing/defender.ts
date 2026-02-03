@@ -7,7 +7,8 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
   return value as Record<string, unknown>
 }
 
-export function processDefenderSummary(data: Record<string, unknown>): DefenderSummary {
+export function processDefenderSummary(data: Record<string, unknown>): DefenderSummary | null {
+  if (!('Defender' in data)) return null
   const defender = getDict(data, 'Defender')
   const summary = getDict(defender, 'Summary')
   const threats = Array.isArray(defender.Threats) ? defender.Threats : []

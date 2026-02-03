@@ -18,7 +18,8 @@ function parseHistoryDate(dateStr: string): Date | null {
   return null
 }
 
-export function processSecurityScores(data: Record<string, unknown>): SecurityScores {
+export function processSecurityScores(data: Record<string, unknown>): SecurityScores | null {
+  if (!('SecureScore' in data)) return null
   const secureScore = getDict(data, 'SecureScore')
   const azureScore = getDict(data, 'AzureSecureScore')
   const summary = getDict(secureScore, 'Summary')
@@ -156,7 +157,7 @@ export function processSecurityScores(data: Record<string, unknown>): SecuritySc
     ? trendData as Record<string, unknown>
     : null
 
-  return {
+  const result: SecurityScores = {
     current_score: (summary.CurrentScore as number) ?? null,
     max_score: (summary.MaxPossibleScore as number) ?? null,
     score_percentage: (summary.ScorePercentage as number) ?? null,
@@ -170,4 +171,11 @@ export function processSecurityScores(data: Record<string, unknown>): SecuritySc
     trend_percentage_change: trendDict ? (trendDict.PercentageChange as number) ?? null : null,
     trend_period_days: trendDict ? (trendDict.PeriodDays as number) ?? null : null,
   }
+
+  // If no current score, no azure score, and no history, consider it empty/missing
+  if (result.current_score === null && result.azure_score === null && result.history.length === 0) {
+      return null
+  }
+
+  return result
 }

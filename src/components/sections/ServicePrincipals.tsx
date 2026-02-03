@@ -2,13 +2,36 @@ import type { ColumnDef } from '@tanstack/react-table'
 import DataTable from '../tables/DataTable'
 import StatusPill from '../common/StatusPill'
 import { AlertTriangle, ShieldAlert, Shield, Info } from 'lucide-react'
-import type { ServicePrincipals as ServicePrincipalsData, ServicePrincipalApp, AppCredentialExpiry } from '../../processing/types'
+import type { ServicePrincipals as ServicePrincipalsData, ServicePrincipalApp } from '../../processing/types'
 import ExpiringCredentials from './ExpiringCredentials'
-import AppCredentials from './AppCredentials'
+import { useState } from 'react'
 
-function MetricCard({ title, value, colorClass, bgClass, icon: Icon }: { title: string; value: number | string; colorClass: string; bgClass: string; icon: any }) {
+function MetricCard({ 
+    title, 
+    value, 
+    colorClass, 
+    bgClass, 
+    icon: Icon,
+    onClick,
+    isSelected
+}: { 
+    title: string; 
+    value: number | string; 
+    colorClass: string; 
+    bgClass: string; 
+    icon: any;
+    onClick: () => void;
+    isSelected: boolean;
+}) {
     return (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex items-start justify-between group hover:border-indigo-200 transition-colors">
+        <div 
+            onClick={onClick}
+            className={`bg-white rounded-xl border p-4 shadow-sm flex items-start justify-between group cursor-pointer transition-all duration-200 ${
+                isSelected 
+                    ? 'ring-2 ring-indigo-500 border-indigo-500 shadow-md' 
+                    : 'border-gray-200 hover:border-indigo-200 hover:shadow-md'
+            }`}
+        >
             <div>
                 <div className="text-sm font-medium text-gray-500 mb-1">{title}</div>
                 <div className={`text-2xl font-bold ${colorClass}`}>{value}</div>
@@ -20,8 +43,19 @@ function MetricCard({ title, value, colorClass, bgClass, icon: Icon }: { title: 
     )
 }
 
-export default function ServicePrincipals({ data, appCredentials }: { data: ServicePrincipalsData; appCredentials: AppCredentialExpiry[] }) {
+export default function ServicePrincipals({ data }: { data: ServicePrincipalsData }) {
+  const [filter, setFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
+
   if (!data.all_apps.length) return null
+
+  const handleFilter = (type: 'all' | 'critical' | 'high' | 'medium' | 'low') => {
+      setFilter(prev => prev === type ? 'all' : type);
+  };
+
+  const filteredApps = data.all_apps.filter(app => {
+      if (filter === 'all') return true;
+      return (app.risk_level || '').toLowerCase() === filter;
+  });
 
   const columns: ColumnDef<ServicePrincipalApp, unknown>[] = [
     { accessorKey: 'name', header: 'Application Name' },
@@ -43,22 +77,52 @@ export default function ServicePrincipals({ data, appCredentials }: { data: Serv
 
   return (
     <div className="space-y-6">
-      <AppCredentials data={appCredentials} />
-      
       {data.expiring_credentials.length > 0 && (
           <ExpiringCredentials credentials={data.expiring_credentials} />
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Critical" value={data.summary.critical} colorClass="text-rose-600" bgClass="bg-rose-50" icon={ShieldAlert} />
-        <MetricCard title="High" value={data.summary.high} colorClass="text-amber-600" bgClass="bg-amber-50" icon={AlertTriangle} />
-        <MetricCard title="Medium" value={data.summary.medium} colorClass="text-yellow-600" bgClass="bg-yellow-50" icon={Shield} />
-        <MetricCard title="Low" value={data.summary.low} colorClass="text-blue-600" bgClass="bg-blue-50" icon={Info} />
+        <MetricCard 
+            title="Critical" 
+            value={data.summary.critical} 
+            colorClass="text-rose-600" 
+            bgClass="bg-rose-50" 
+            icon={ShieldAlert} 
+            onClick={() => handleFilter('critical')}
+            isSelected={filter === 'critical'}
+        />
+        <MetricCard 
+            title="High" 
+            value={data.summary.high} 
+            colorClass="text-amber-600" 
+            bgClass="bg-amber-50" 
+            icon={AlertTriangle} 
+            onClick={() => handleFilter('high')}
+            isSelected={filter === 'high'}
+        />
+        <MetricCard 
+            title="Medium" 
+            value={data.summary.medium} 
+            colorClass="text-yellow-600" 
+            bgClass="bg-yellow-50" 
+            icon={Shield} 
+            onClick={() => handleFilter('medium')}
+            isSelected={filter === 'medium'}
+        />
+        <MetricCard 
+            title="Low" 
+            value={data.summary.low} 
+            colorClass="text-blue-600" 
+            bgClass="bg-blue-50" 
+            icon={Info} 
+            onClick={() => handleFilter('low')}
+            isSelected={filter === 'low'}
+        />
       </div>
       <DataTable 
-        title="Application Permissions"
+        title={`Application Permissions ${filter !== 'all' ? `(${filter})` : ''}`}
         columns={columns} 
-        data={data.all_apps} 
+        data={filteredApps} 
         renderSubComponent={({ row }) => (
           <div className="space-y-4">
             <h4 className="font-semibold text-sm uppercase text-gray-500">Permissions</h4>

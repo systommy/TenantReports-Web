@@ -1,17 +1,18 @@
 import { formatDate } from '../utils/format'
-import type { SentinelIncidents } from './types'
+import type { DefenderIncidents } from './types'
 
-export function processSentinelIncidents(data: Record<string, unknown>): SentinelIncidents {
-  const sentinelData = data.Sentinel ?? {}
+export function processDefenderIncidents(data: Record<string, unknown>): DefenderIncidents | null {
+  if (!('DefenderIncidents' in data)) return null
+  const incidentsData = data.DefenderIncidents ?? {}
   let incidents: unknown[]
-  if (typeof sentinelData === 'object' && sentinelData !== null && !Array.isArray(sentinelData)) {
-    const sd = sentinelData as Record<string, unknown>
+  if (typeof incidentsData === 'object' && incidentsData !== null && !Array.isArray(incidentsData)) {
+    const sd = incidentsData as Record<string, unknown>
     incidents = Array.isArray(sd.Incidents) ? sd.Incidents : []
   } else {
-    incidents = Array.isArray(sentinelData) ? sentinelData : []
+    incidents = Array.isArray(incidentsData) ? incidentsData : []
   }
 
-  const rows: SentinelIncidents['incidents'] = []
+  const rows: DefenderIncidents['incidents'] = []
   const bySeverity: Record<string, number> = {}
   const byStatus: Record<string, number> = {}
 

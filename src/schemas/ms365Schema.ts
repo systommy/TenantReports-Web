@@ -13,6 +13,10 @@ export const ms365Schema = z.object({
     Summary: z.object({}).passthrough(),
   }).passthrough(),
   SecureScore: z.object({}).passthrough(),
+  AppRegistrationExpiry: z.object({
+    Summary: z.object({}).passthrough(),
+    Credentials: z.array(z.object({}).passthrough()),
+  }).passthrough(),
 }).passthrough()
 
 export type MS365Data = z.infer<typeof ms365Schema>

@@ -7,7 +7,8 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
   return value as Record<string, unknown>
 }
 
-export function processRiskyUsers(data: Record<string, unknown>): RiskyUser[] {
+export function processRiskyUsers(data: Record<string, unknown>): RiskyUser[] | null {
+  if (!('RiskyUsers' in data)) return null
   const risky = getDict(data, 'RiskyUsers')
   const entries = Array.isArray(risky.RiskyUsers) ? risky.RiskyUsers : []
   const rows: RiskyUser[] = []

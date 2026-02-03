@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import type { ProcessedReport } from '../../processing/types';
 import { 
   LayoutDashboard, 
   ShieldAlert, 
@@ -14,43 +15,8 @@ export type TabId = 'overview' | 'identity' | 'security' | 'compliance' | 'audit
 interface SidebarProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
+  report: ProcessedReport;
 }
-
-const SECTIONS: Record<TabId, { id: string; label: string }[]> = {
-  overview: [
-    { id: 'tenant-overview', label: 'Tenant Overview' },
-    { id: 'misconfigurations', label: 'Common Misconfigurations' },
-    { id: 'ms365-secure-score', label: 'MS365 Secure Score' },
-    { id: 'azure-secure-score', label: 'Azure Secure Score' },
-    { id: 'mfa-coverage', label: 'MFA Coverage' },
-    { id: 'license-overview', label: 'License Overview' },
-    { id: 'conditional-access-overview', label: 'Conditional Access' },
-  ],
-  identity: [
-    { id: 'user-directory', label: 'User Directory' },
-    { id: 'privileged-access', label: 'Privileged Access' },
-    { id: 'pim-activations', label: 'PIM Activations' },
-    { id: 'risky-users', label: 'Risky Users' },
-    { id: 'service-principals', label: 'Service Principals' },
-    { id: 'mailbox-permissions', label: 'Mailbox Permissions' },
-    { id: 'calendar-permissions', label: 'Calendar Permissions' },
-  ],
-  security: [
-    { id: 'sentinel-incidents', label: 'Sentinel Incidents' },
-    { id: 'microsoft-defender', label: 'Microsoft Defender' },
-    { id: 'app-security', label: 'App Security' },
-  ],
-  compliance: [
-    { id: 'intune-device-compliance', label: 'Intune Device Compliance' },
-    { id: 'apple-mdm-certificates', label: 'Apple MDM Certificates' },
-    { id: 'shared-mailboxes', label: 'Shared Mailbox Compliance' },
-  ],
-  audit: [
-    { id: 'group-modifications', label: 'Group Modifications' },
-    { id: 'user-modifications', label: 'User Modifications' },
-    { id: 'license-changes', label: 'Recent License Changes' },
-  ],
-};
 
 const NavItem = ({ 
   icon: Icon, 
@@ -124,7 +90,49 @@ const NavItem = ({
   );
 };
 
-export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps) {
+  // Dynamic sections based on report data
+  const sections: Record<TabId, { id: string; label: string }[]> = {
+    overview: [
+      { id: 'tenant-overview', label: 'Tenant Overview', visible: !!report.tenant },
+      { id: 'misconfigurations', label: 'Common Misconfigurations', visible: !!report.configuration },
+      { id: 'ms365-secure-score', label: 'MS365 Secure Score', visible: !!report.security?.current_score },
+      { id: 'azure-secure-score', label: 'Azure Secure Score', visible: !!report.security?.azure_score },
+      { id: 'mfa-coverage', label: 'MFA Coverage', visible: !!report.mfa },
+      { id: 'license-overview', label: 'License Overview', visible: !!report.licenses },
+      { id: 'conditional-access-overview', label: 'Conditional Access', visible: !!report.conditionalAccess },
+    ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
+    
+    identity: [
+      { id: 'user-directory', label: 'User Directory', visible: !!report.users },
+      { id: 'privileged-access', label: 'Privileged Access', visible: !!report.privileged },
+      { id: 'pim-activations', label: 'PIM Activations', visible: !!report.privileged?.activations?.length },
+      { id: 'risky-users', label: 'Risky Users', visible: !!report.riskyUsers },
+      { id: 'service-principals', label: 'Service Principals', visible: !!report.servicePrincipals },
+      { id: 'mailbox-permissions', label: 'Mailbox Permissions', visible: !!report.mailbox },
+      { id: 'calendar-permissions', label: 'Calendar Permissions', visible: !!report.calendar },
+    ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
+    
+    security: [
+      { id: 'defender-incidents', label: 'Defender Incidents', visible: !!report.defenderIncidents },
+      { id: 'microsoft-defender', label: 'Microsoft Defender', visible: !!report.defender },
+      // Removed 'App Security' as it seemed undefined or redundant
+    ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
+    
+    compliance: [
+      { id: 'intune-device-compliance', label: 'Intune Device Compliance', visible: !!report.compliance },
+      { id: 'apple-mdm-certificates', label: 'Apple MDM Certificates', visible: !!report.appleMdm },
+      { id: 'app-registration-secrets', label: 'App Registration Secrets', visible: !!report.appCredentials },
+      { id: 'shared-mailboxes', label: 'Shared Mailbox Compliance', visible: !!report.sharedMailboxes },
+    ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
+    
+    audit: [
+      { id: 'group-modifications', label: 'Group Modifications', visible: !!report.audit?.group_events },
+      { id: 'user-modifications', label: 'User Modifications', visible: !!report.audit?.user_events },
+      { id: 'license-changes', label: 'Recent License Changes', visible: !!report.licenseChanges },
+    ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
+  };
+
   // Default all expanded
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     overview: true,
@@ -158,7 +166,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           isExpanded={expanded.overview}
           onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('overview'); }}
           onClick={() => onTabChange('overview')}
-          subsections={SECTIONS.overview}
+          subsections={sections.overview}
         />
         <NavItem 
           id="identity" 
@@ -168,7 +176,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           isExpanded={expanded.identity}
           onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('identity'); }}
           onClick={() => onTabChange('identity')}
-          subsections={SECTIONS.identity}
+          subsections={sections.identity}
         />
         <NavItem 
           id="security" 
@@ -178,7 +186,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           isExpanded={expanded.security}
           onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('security'); }}
           onClick={() => onTabChange('security')}
-          subsections={SECTIONS.security}
+          subsections={sections.security}
         />
         <NavItem 
           id="compliance" 
@@ -188,7 +196,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           isExpanded={expanded.compliance}
           onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('compliance'); }}
           onClick={() => onTabChange('compliance')}
-          subsections={SECTIONS.compliance}
+          subsections={sections.compliance}
         />
         <NavItem 
           id="audit" 
@@ -198,7 +206,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           isExpanded={expanded.audit}
           onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('audit'); }}
           onClick={() => onTabChange('audit')}
-          subsections={SECTIONS.audit}
+          subsections={sections.audit}
         />
       </nav>
     </aside>
