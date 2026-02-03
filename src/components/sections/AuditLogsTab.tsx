@@ -1,5 +1,5 @@
 import type { ProcessedReport, LicenseChange } from '../../processing/types';
-import AuditEvents from './AuditEvents';
+import { UserModifications, GroupModifications } from './AuditEvents';
 import type { ColumnDef } from '@tanstack/react-table';
 import DataTable from '../tables/DataTable';
 import { Info } from 'lucide-react';
@@ -12,13 +12,17 @@ const changeColumns: ColumnDef<LicenseChange, unknown>[] = [
   { accessorKey: 'sku', header: 'License' },
 ]
 
-export default function AuditTab({ data }: { data: ProcessedReport }) {
+export default function AuditLogsTab({ data }: { data: ProcessedReport }) {
   const changes = data.licenseChanges;
 
   return (
     <div className="space-y-8">
       {data.audit && (
-      <AuditEvents data={data.audit} />
+          <UserModifications data={data.audit} />
+      )}
+
+      {data.audit && (
+          <GroupModifications data={data.audit} />
       )}
 
       {changes && (

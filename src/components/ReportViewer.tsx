@@ -5,15 +5,17 @@ import type { TabId } from './layout/Sidebar'
 import ExportButton from './ExportButton'
 import { exportHtml } from '../utils/exportHtml'
 
-import OverviewTab from './sections/OverviewTab'
-import IdentityTab from './sections/IdentityTab'
-import SecurityTab from './sections/SecurityTab'
-import ComplianceTab from './sections/ComplianceTab'
-import AuditTab from './sections/AuditTab'
+import DashboardTab from './sections/DashboardTab'
+import IdentityAccessTab from './sections/IdentityAccessTab'
+import EndpointTab from './sections/EndpointTab'
+import ExchangeTab from './sections/ExchangeTab'
+import SecurityOpsTab from './sections/SecurityOpsTab'
+import LicensingTab from './sections/LicensingTab'
+import AuditLogsTab from './sections/AuditLogsTab'
 
 export default function ReportViewer({ rawData, onReset }: { rawData: Record<string, unknown>; onReset: () => void }) {
   const report = useReportData(rawData)
-  const [activeTab, setActiveTab] = useState<TabId>('overview')
+  const [activeTab, setActiveTab] = useState<TabId>('dashboard')
   const [exportState, setExportState] = useState<{ type: 'pdf' | 'html'; scope: 'current' | 'all'; status: 'idle' | 'ready' }>({ 
     type: 'pdf', scope: 'current', status: 'idle' 
   })
@@ -61,11 +63,13 @@ export default function ReportViewer({ rawData, onReset }: { rawData: Record<str
 
   const renderCurrentTab = () => {
     switch (activeTab) {
-      case 'overview': return <OverviewTab data={report} onTabChange={setActiveTab} />
-      case 'identity': return <IdentityTab data={report} />
-      case 'security': return <SecurityTab data={report} />
-      case 'compliance': return <ComplianceTab data={report} />
-      case 'audit': return <AuditTab data={report} />
+      case 'dashboard': return <DashboardTab data={report} onTabChange={setActiveTab} />
+      case 'identity': return <IdentityAccessTab data={report} />
+      case 'endpoints': return <EndpointTab data={report} />
+      case 'exchange': return <ExchangeTab data={report} />
+      case 'security': return <SecurityOpsTab data={report} />
+      case 'licensing': return <LicensingTab data={report} />
+      case 'audit': return <AuditLogsTab data={report} />
       default: return <div>Select a tab</div>
     }
   }
@@ -73,36 +77,50 @@ export default function ReportViewer({ rawData, onReset }: { rawData: Record<str
   const renderAllTabs = () => (
     <div className="space-y-8">
         <div className="print-break-after">
-            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Executive Overview</h2>
-            <OverviewTab data={report} onTabChange={setActiveTab} />
+            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Executive Dashboard</h2>
+            <DashboardTab data={report} onTabChange={setActiveTab} />
         </div>
         
         <div className="print-break"></div>
 
         <div className="print-break-after">
             <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Identity & Access</h2>
-            <IdentityTab data={report} />
+            <IdentityAccessTab data={report} />
         </div>
 
         <div className="print-break"></div>
 
         <div className="print-break-after">
-            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Security Incidents</h2>
-            <SecurityTab data={report} />
+            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Endpoint & Device Management</h2>
+            <EndpointTab data={report} />
         </div>
 
         <div className="print-break"></div>
 
         <div className="print-break-after">
-            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Compliance Status</h2>
-            <ComplianceTab data={report} />
+            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Exchange & Collaboration</h2>
+            <ExchangeTab data={report} />
         </div>
 
         <div className="print-break"></div>
 
         <div className="print-break-after">
-            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Audit Events</h2>
-            <AuditTab data={report} />
+            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Security Operations</h2>
+            <SecurityOpsTab data={report} />
+        </div>
+
+        <div className="print-break"></div>
+
+        <div className="print-break-after">
+            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Licensing</h2>
+            <LicensingTab data={report} />
+        </div>
+
+        <div className="print-break"></div>
+
+        <div className="print-break-after">
+            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Audit Logs</h2>
+            <AuditLogsTab data={report} />
         </div>
     </div>
   )
@@ -125,3 +143,4 @@ export default function ReportViewer({ rawData, onReset }: { rawData: Record<str
     </MainLayout>
   )
 }
+

@@ -4,13 +4,15 @@ import {
   LayoutDashboard, 
   ShieldAlert, 
   Users, 
-  CheckCircle, 
+  Smartphone,
+  Mail,
+  Settings,
   Activity,
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
 
-export type TabId = 'overview' | 'identity' | 'security' | 'compliance' | 'audit';
+export type TabId = 'dashboard' | 'identity' | 'endpoints' | 'exchange' | 'security' | 'licensing' | 'audit';
 
 interface SidebarProps {
   activeTab: TabId;
@@ -93,52 +95,59 @@ const NavItem = ({
 export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps) {
   // Dynamic sections based on report data
   const sections: Record<TabId, { id: string; label: string }[]> = {
-    overview: [
+    dashboard: [
       { id: 'tenant-overview', label: 'Tenant Overview', visible: !!report.tenant },
       { id: 'misconfigurations', label: 'Common Misconfigurations', visible: !!report.configuration },
       { id: 'ms365-secure-score', label: 'MS365 Secure Score', visible: !!report.security?.current_score },
       { id: 'azure-secure-score', label: 'Azure Secure Score', visible: !!report.security?.azure_score },
-      { id: 'mfa-coverage', label: 'MFA Coverage', visible: !!report.mfa },
-      { id: 'license-overview', label: 'License Overview', visible: !!report.licenses },
-      { id: 'conditional-access-overview', label: 'Conditional Access', visible: !!report.conditionalAccess },
     ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
     
     identity: [
+      { id: 'mfa-coverage', label: 'MFA Coverage', visible: !!report.mfa },
+      { id: 'conditional-access-overview', label: 'Conditional Access', visible: !!report.conditionalAccess },
       { id: 'user-directory', label: 'User Directory', visible: !!report.users },
-      { id: 'privileged-access', label: 'Privileged Access', visible: !!report.privileged },
-      { id: 'pim-activations', label: 'PIM Activations', visible: !!report.privileged?.activations?.length },
       { id: 'risky-users', label: 'Risky Users', visible: !!report.riskyUsers },
       { id: 'service-principals', label: 'Service Principals', visible: !!report.servicePrincipals },
-      { id: 'mailbox-permissions', label: 'Mailbox Permissions', visible: !!report.mailbox },
-      { id: 'calendar-permissions', label: 'Calendar Permissions', visible: !!report.calendar },
+      { id: 'app-registration-secrets', label: 'App Registration Secrets', visible: !!report.appCredentials },
     ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
-    
-    security: [
-      { id: 'defender-incidents', label: 'Defender Incidents', visible: !!report.defenderIncidents },
-      { id: 'microsoft-defender', label: 'Microsoft Defender', visible: !!report.defender },
-      // Removed 'App Security' as it seemed undefined or redundant
-    ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
-    
-    compliance: [
+
+    endpoints: [
       { id: 'intune-device-compliance', label: 'Intune Device Compliance', visible: !!report.compliance },
       { id: 'apple-mdm-certificates', label: 'Apple MDM Certificates', visible: !!report.appleMdm },
-      { id: 'app-registration-secrets', label: 'App Registration Secrets', visible: !!report.appCredentials },
+    ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
+
+    exchange: [
+      { id: 'mailbox-permissions', label: 'Mailbox Permissions', visible: !!report.mailbox },
+      { id: 'calendar-permissions', label: 'Calendar Permissions', visible: !!report.calendar },
       { id: 'shared-mailboxes', label: 'Shared Mailbox Compliance', visible: !!report.sharedMailboxes },
     ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
     
+    security: [
+      { id: 'privileged-access', label: 'Privileged Access', visible: !!report.privileged },
+      { id: 'defender-incidents', label: 'Defender Incidents', visible: !!report.defenderIncidents },
+      { id: 'microsoft-defender', label: 'Microsoft Defender', visible: !!report.defender },
+      { id: 'pim-activations', label: 'PIM Activations', visible: !!report.privileged?.activations?.length },
+    ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
+    
+    licensing: [
+      { id: 'license-overview', label: 'License Overview', visible: !!report.licenses },
+    ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
+
     audit: [
-      { id: 'group-modifications', label: 'Group Modifications', visible: !!report.audit?.group_events },
       { id: 'user-modifications', label: 'User Modifications', visible: !!report.audit?.user_events },
+      { id: 'group-modifications', label: 'Group Modifications', visible: !!report.audit?.group_events },
       { id: 'license-changes', label: 'Recent License Changes', visible: !!report.licenseChanges },
     ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
   };
 
   // Default all expanded
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    overview: true,
+    dashboard: true,
     identity: true,
+    endpoints: true,
+    exchange: true,
     security: true,
-    compliance: true,
+    licensing: true,
     audit: true,
   });
 
@@ -159,14 +168,14 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
       
       <nav className="flex-1 px-4 overflow-y-auto pb-6">
         <NavItem 
-          id="overview" 
+          id="dashboard" 
           icon={LayoutDashboard} 
-          label="Overview" 
-          isActive={activeTab === 'overview'} 
-          isExpanded={expanded.overview}
-          onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('overview'); }}
-          onClick={() => onTabChange('overview')}
-          subsections={sections.overview}
+          label="Dashboard" 
+          isActive={activeTab === 'dashboard'} 
+          isExpanded={expanded.dashboard}
+          onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('dashboard'); }}
+          onClick={() => onTabChange('dashboard')}
+          subsections={sections.dashboard}
         />
         <NavItem 
           id="identity" 
@@ -178,10 +187,30 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
           onClick={() => onTabChange('identity')}
           subsections={sections.identity}
         />
+         <NavItem 
+          id="endpoints" 
+          icon={Smartphone} 
+          label="Endpoint & Device" 
+          isActive={activeTab === 'endpoints'} 
+          isExpanded={expanded.endpoints}
+          onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('endpoints'); }}
+          onClick={() => onTabChange('endpoints')}
+          subsections={sections.endpoints}
+        />
+        <NavItem 
+          id="exchange" 
+          icon={Mail} 
+          label="Exchange & Collab" 
+          isActive={activeTab === 'exchange'} 
+          isExpanded={expanded.exchange}
+          onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('exchange'); }}
+          onClick={() => onTabChange('exchange')}
+          subsections={sections.exchange}
+        />
         <NavItem 
           id="security" 
           icon={ShieldAlert} 
-          label="Security Incidents" 
+          label="Security Operations" 
           isActive={activeTab === 'security'} 
           isExpanded={expanded.security}
           onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('security'); }}
@@ -189,19 +218,19 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
           subsections={sections.security}
         />
         <NavItem 
-          id="compliance" 
-          icon={CheckCircle} 
-          label="Compliance" 
-          isActive={activeTab === 'compliance'} 
-          isExpanded={expanded.compliance}
-          onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('compliance'); }}
-          onClick={() => onTabChange('compliance')}
-          subsections={sections.compliance}
+          id="licensing" 
+          icon={Settings} 
+          label="Licensing" 
+          isActive={activeTab === 'licensing'} 
+          isExpanded={expanded.licensing}
+          onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('licensing'); }}
+          onClick={() => onTabChange('licensing')}
+          subsections={sections.licensing}
         />
         <NavItem 
           id="audit" 
           icon={Activity} 
-          label="Audit Events" 
+          label="Audit Logs" 
           isActive={activeTab === 'audit'} 
           isExpanded={expanded.audit}
           onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('audit'); }}
@@ -212,3 +241,4 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
     </aside>
   );
 }
+

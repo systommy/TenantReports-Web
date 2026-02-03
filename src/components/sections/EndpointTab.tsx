@@ -1,8 +1,6 @@
 import type { ProcessedReport } from '../../processing/types';
 import ComplianceOverview from './ComplianceOverview';
 import AppleMdm from './AppleMdm';
-import SharedMailboxes from './SharedMailboxes';
-import AppRegistrationSecrets from './AppRegistrationSecrets';
 import { Info } from 'lucide-react';
 
 function EmptyState({ message }: { message: string }) {
@@ -14,7 +12,7 @@ function EmptyState({ message }: { message: string }) {
     )
 }
 
-export default function ComplianceTab({ data }: { data: ProcessedReport }) {
+export default function EndpointTab({ data }: { data: ProcessedReport }) {
   return (
     <div className="space-y-8">
       {data.compliance && (
@@ -32,28 +30,6 @@ export default function ComplianceTab({ data }: { data: ProcessedReport }) {
         ) : (
           <EmptyState message="No Apple MDM certificate data available." />
         )}
-      </div>
-      )}
-
-      {data.appCredentials && (
-      <div id="app-registration-secrets">
-        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">App Registration Secrets</h3>
-        {data.appCredentials?.summary ? (
-            <AppRegistrationSecrets data={data.appCredentials} />
-        ) : (
-            <EmptyState message="No App Registration Secrets data available." />
-        )}
-      </div>
-      )}
-
-      {data.sharedMailboxes && (
-      <div id="shared-mailboxes">
-          <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">Shared Mailbox Compliance</h3>
-          {data.sharedMailboxes.length > 0 ? (
-            <SharedMailboxes data={data.sharedMailboxes} />
-          ) : (
-            <EmptyState message="No shared mailbox compliance data available." />
-          )}
       </div>
       )}
     </div>

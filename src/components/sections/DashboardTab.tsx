@@ -12,12 +12,9 @@ import type { TabId } from '../layout/Sidebar';
 import ExpandableStatCard from '../common/ExpandableStatCard';
 import SecurityScores from './SecurityScores';
 import Misconfigurations from './Misconfigurations';
-import MfaCoverage from './MfaCoverage';
-import LicenseOverview from './LicenseOverview';
-import ConditionalAccess from './ConditionalAccess';
 import { pct } from '../../utils/format';
 
-interface OverviewTabProps {
+interface DashboardTabProps {
   data: ProcessedReport;
   onTabChange: (tab: TabId) => void;
 }
@@ -55,7 +52,7 @@ function AlertBanner({
     );
 }
 
-export default function OverviewTab({ data, onTabChange }: OverviewTabProps) {
+export default function DashboardTab({ data, onTabChange }: DashboardTabProps) {
   // --- Data Preparation ---
   const scoreTrend = data.security?.trend_percentage_change;
   const scoreHistoryLabels = data.security?.history.map(h => h.date.split(' ')[0]) ?? [];
@@ -83,7 +80,7 @@ export default function OverviewTab({ data, onTabChange }: OverviewTabProps) {
                   title="Non-Compliant Shared Mailboxes"
                   message={`${nonCompliant} shared mailboxes have sign-in enabled but no license assigned. This is a security risk.`}
                   intent="danger"
-                  onClick={() => navigateTo('compliance', 'shared-mailboxes')}
+                  onClick={() => navigateTo('exchange', 'shared-mailboxes')}
               />
           );
       }
@@ -99,7 +96,7 @@ export default function OverviewTab({ data, onTabChange }: OverviewTabProps) {
                   title="Expired App Registration Secrets"
                   message={`${ExpiredCount} application credentials have expired and may cause service outages.`}
                   intent="danger"
-                  onClick={() => navigateTo('compliance', 'app-registration-secrets')}
+                  onClick={() => navigateTo('identity', 'app-registration-secrets')}
               />
           );
       }
@@ -111,7 +108,7 @@ export default function OverviewTab({ data, onTabChange }: OverviewTabProps) {
                   title="Expiring App Registration Secrets"
                   message={`${ExpiringSoonCount} application credentials will expire soon. Renew them to prevent outages.`}
                   intent="warning"
-                  onClick={() => navigateTo('compliance', 'app-registration-secrets')}
+                  onClick={() => navigateTo('identity', 'app-registration-secrets')}
               />
           );
       }
@@ -134,7 +131,7 @@ export default function OverviewTab({ data, onTabChange }: OverviewTabProps) {
                   title="Expired Apple MDM Certificates"
                   message={`${expired} APNS certificates have expired. Apple device management may be failing.`}
                   intent="danger"
-                  onClick={() => navigateTo('compliance', 'apple-mdm-certificates')}
+                  onClick={() => navigateTo('endpoints', 'apple-mdm-certificates')}
               />
           );
       }
@@ -146,7 +143,7 @@ export default function OverviewTab({ data, onTabChange }: OverviewTabProps) {
                   title="Expiring Apple MDM Certificates"
                   message={`${expiring} APNS certificates will expire soon. Renew immediately.`}
                   intent="warning"
-                  onClick={() => navigateTo('compliance', 'apple-mdm-certificates')}
+                  onClick={() => navigateTo('endpoints', 'apple-mdm-certificates')}
               />
           );
       }
@@ -164,7 +161,7 @@ export default function OverviewTab({ data, onTabChange }: OverviewTabProps) {
           />
       );
   }
-  
+
   return (
     <div className="space-y-8">
       {/* Tenant Overview */}
@@ -202,7 +199,7 @@ export default function OverviewTab({ data, onTabChange }: OverviewTabProps) {
           </div>
         </div>
 
-        {/* Key Metrics Grid (Moved from Executive Summary) */}
+        {/* Key Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {data.security && (
           <ExpandableStatCard 
@@ -300,27 +297,6 @@ export default function OverviewTab({ data, onTabChange }: OverviewTabProps) {
         historyLabels={scoreHistoryLabels}
         historyValues={scoreHistoryValues}
       />
-      )}
-
-      {data.mfa && (
-      <div id="mfa-coverage" className="space-y-4">
-        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">MFA & Identity Security</h3>
-        <MfaCoverage data={data.mfa} />
-      </div>
-      )}
-
-      {data.licenses && (
-      <div id="license-overview" className="space-y-4">
-        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">License Overview</h3>
-        <LicenseOverview data={data.licenses} />
-      </div>
-      )}
-
-      {data.conditionalAccess && (
-      <div id="conditional-access-overview" className="space-y-4">
-        <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Conditional Access Policies</h3>
-        <ConditionalAccess data={data.conditionalAccess} />
-      </div>
       )}
     </div>
   );

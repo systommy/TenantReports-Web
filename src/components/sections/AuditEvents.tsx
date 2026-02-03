@@ -56,14 +56,11 @@ function MetricsGrid({ title, count, topActivity }: { title: string; count: numb
   )
 }
 
-export default function AuditEvents({ data }: { data: AuditEventsData }) {
-  if (!data.group_events.length && !data.user_events.length) return null
+export function GroupModifications({ data }: { data: AuditEventsData }) {
+    if (!data.group_events.length) return null;
+    const groupTop = Object.entries(data.group_activities).sort((a, b) => b[1] - a[1])[0];
 
-  const groupTop = Object.entries(data.group_activities).sort((a, b) => b[1] - a[1])[0];
-  const userTop = Object.entries(data.user_activities).sort((a, b) => b[1] - a[1])[0];
-
-  return (
-    <div className="space-y-12">
+    return (
       <div id="group-modifications" className="space-y-4">
         <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Group Modifications</h3>
         <MetricsGrid 
@@ -84,7 +81,14 @@ export default function AuditEvents({ data }: { data: AuditEventsData }) {
           )}
         />
       </div>
+    );
+}
 
+export function UserModifications({ data }: { data: AuditEventsData }) {
+    if (!data.user_events.length) return null;
+    const userTop = Object.entries(data.user_activities).sort((a, b) => b[1] - a[1])[0];
+
+    return (
       <div id="user-modifications" className="space-y-4">
         <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">User Modifications</h3>
         <MetricsGrid 
@@ -105,6 +109,16 @@ export default function AuditEvents({ data }: { data: AuditEventsData }) {
           )}
         />
       </div>
+    );
+}
+
+export default function AuditEvents({ data }: { data: AuditEventsData }) {
+  if (!data.group_events.length && !data.user_events.length) return null
+
+  return (
+    <div className="space-y-12">
+      <GroupModifications data={data} />
+      <UserModifications data={data} />
     </div>
   )
 }
