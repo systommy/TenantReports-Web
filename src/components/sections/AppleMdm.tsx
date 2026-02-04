@@ -20,7 +20,7 @@ const columns: ColumnDef<Cert, unknown>[] = [
         
         if (v.includes('expired')) {
             intent = 'danger';
-        } else if (v.includes('expiring') || (daysLeft !== null && daysLeft < 30)) {
+        } else if (v.includes('expiring') || v.includes('expiringsoon') || (daysLeft !== null && daysLeft < 30)) {
             intent = 'warning';
         } else if (v.includes('valid') || v.includes('active')) {
             intent = 'success';

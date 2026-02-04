@@ -305,28 +305,37 @@ export default function DashboardTab({ data, onTabChange }: DashboardTabProps) {
           
           {isTenantInfoExpanded && (
              <div className="border-t border-gray-200 p-6 bg-gray-50/50 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                    {/* Location Info */}
                    <div>
                       <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-3">
                         <MapPin size={16} className="text-indigo-600" /> Location Details
                       </h4>
-                      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                        <dt className="text-gray-500">Country:</dt>
-                        <dd className="font-medium text-gray-900">{data.tenant.country_code || '-'}</dd>
-                        
-                        <dt className="text-gray-500">State/Province:</dt>
-                        <dd className="font-medium text-gray-900">{data.tenant.state || '-'}</dd>
-                        
-                        <dt className="text-gray-500">City:</dt>
-                        <dd className="font-medium text-gray-900">{data.tenant.city || '-'}</dd>
-
-                        <dt className="text-gray-500">Postal Code:</dt>
-                        <dd className="font-medium text-gray-900">{data.tenant.postal_code || '-'}</dd>
-
-                        <dt className="text-gray-500">Language:</dt>
-                        <dd className="font-medium text-gray-900">{data.tenant.preferred_language || '-'}</dd>
-                      </dl>
+                      <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
+                        <table className="min-w-full divide-y divide-gray-200">
+                           <tbody className="bg-white divide-y divide-gray-200">
+                              <tr>
+                                <td className="px-4 py-3 text-sm text-gray-500 bg-gray-50 font-medium w-1/4">Country</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{data.tenant.country_code || '-'}</td>
+                              </tr>
+                              <tr>
+                                <td className="px-4 py-3 text-sm text-gray-500 bg-gray-50 font-medium">State/Province</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{data.tenant.state || '-'}</td>
+                              </tr>
+                              <tr>
+                                <td className="px-4 py-3 text-sm text-gray-500 bg-gray-50 font-medium">City</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{data.tenant.city || '-'}</td>
+                              </tr>
+                              <tr>
+                                <td className="px-4 py-3 text-sm text-gray-500 bg-gray-50 font-medium">Postal Code</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{data.tenant.postal_code || '-'}</td>
+                              </tr>
+                              <tr>
+                                <td className="px-4 py-3 text-sm text-gray-500 bg-gray-50 font-medium">Language</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{data.tenant.preferred_language || '-'}</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                      </div>
                    </div>
 
                    {/* Technical Contacts */}
@@ -335,18 +344,19 @@ export default function DashboardTab({ data, onTabChange }: DashboardTabProps) {
                         <Mail size={16} className="text-indigo-600" /> Technical Notification Emails
                       </h4>
                       {data.tenant.technical_notification_mails && data.tenant.technical_notification_mails.length > 0 ? (
-                        <ul className="space-y-1">
-                          {data.tenant.technical_notification_mails.map((email, idx) => (
-                             <li key={idx} className="text-sm text-gray-700 bg-white border border-gray-200 rounded px-2 py-1 inline-block mr-2 mb-1">
-                               {email}
-                             </li>
-                          ))}
-                        </ul>
+                        <div className="bg-white border border-gray-200 rounded-lg p-4">
+                            <ul className="space-y-1">
+                              {data.tenant.technical_notification_mails.map((email, idx) => (
+                                 <li key={idx} className="text-sm text-gray-700 font-mono bg-gray-50 px-2 py-1 rounded inline-block mr-2 mb-1">
+                                   {email}
+                                 </li>
+                              ))}
+                            </ul>
+                        </div>
                       ) : (
                         <p className="text-sm text-gray-500 italic">No technical notification emails configured.</p>
                       )}
                    </div>
-                </div>
 
                 {/* Domains List */}
                 {data.domains && (
@@ -354,14 +364,38 @@ export default function DashboardTab({ data, onTabChange }: DashboardTabProps) {
                     <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-3">
                        <Globe size={16} className="text-indigo-600" /> Verified Domains ({data.domains.length})
                     </h4>
-                    <div className="flex flex-wrap gap-2">
-                       {data.domains.map((d, i) => (
-                         <div key={i} className={`text-xs border rounded-full px-3 py-1 flex items-center gap-2 ${d.is_default ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium' : 'bg-white border-gray-200 text-gray-600'}`}>
-                            {d.domain}
-                            {d.is_default && <span className="bg-indigo-200 text-indigo-800 text-[10px] px-1 rounded">Default</span>}
-                            {d.is_initial && <span className="bg-gray-100 text-gray-600 text-[10px] px-1 rounded">Initial</span>}
-                         </div>
-                       ))}
+                    <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Domain</th>
+                            <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                            <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Verified</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {data.domains.map((d, i) => (
+                            <tr key={i} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-4 py-2 text-sm font-medium text-gray-900">{d.domain}</td>
+                              <td className="px-4 py-2 text-sm">
+                                 <div className="flex gap-2">
+                                     {d.is_default && <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded-full font-medium border border-indigo-200">Default</span>}
+                                     {d.is_initial && <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full border border-gray-200">Initial</span>}
+                                 </div>
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-900">
+                                 {d.is_verified ? (
+                                     <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-xs font-medium border border-emerald-200">
+                                         Verified
+                                     </span>
+                                 ) : (
+                                     <span className="text-gray-400 text-xs">Unverified</span>
+                                 )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 )}

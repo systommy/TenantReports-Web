@@ -14,7 +14,8 @@ const columns: ColumnDef<Record<string, unknown>, unknown>[] = [
     accessorKey: 'ComplianceState', header: 'Status',
     cell: ({ getValue }) => {
       const v = (getValue() as string) ?? '';
-      const intent = v.toLowerCase() === 'compliant' ? 'success' : 'danger';
+      const lowV = v.toLowerCase();
+      const intent = lowV === 'compliant' ? 'success' : lowV === 'ingraceperiod' ? 'warning' : 'danger';
       return <StatusPill label={v} intent={intent} />;
     },
   },

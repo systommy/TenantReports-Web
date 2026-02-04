@@ -63,7 +63,7 @@ export default function ServicePrincipals({ data }: { data: ServicePrincipalsDat
       accessorKey: 'risk_level', header: 'Risk Level',
       cell: ({ getValue }) => {
         const v = (getValue() as string)?.toLowerCase();
-        const intent = v === 'high' ? 'danger' : v === 'medium' ? 'warning' : 'info';
+        const intent = (v === 'high' || v === 'critical') ? 'danger' : v === 'medium' ? 'warning' : v === 'low' ? 'info' : 'neutral';
         return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
       },
     },
@@ -133,6 +133,7 @@ export default function ServicePrincipals({ data }: { data: ServicePrincipalsDat
                     <tr>
                       <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Permission</th>
                       <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Resource</th>
+                      <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Principal</th>
                       <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
                       <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Risk</th>
                     </tr>
@@ -142,11 +143,15 @@ export default function ServicePrincipals({ data }: { data: ServicePrincipalsDat
                       <tr key={i} className="hover:bg-gray-50 transition-colors">
                          <td className="px-4 py-2 text-sm font-medium text-gray-900">{p.permission}</td>
                          <td className="px-4 py-2 text-sm text-gray-500">{p.resource}</td>
+                         <td className="px-4 py-2 text-sm text-gray-500">{p.principal}</td>
                          <td className="px-4 py-2 text-sm text-gray-500">{p.consent_type}</td>
                          <td className="px-4 py-2 text-sm">
                             <StatusPill 
                                 label={p.risk_level || 'None'} 
-                                intent={(p.risk_level === 'High' || p.risk_level === 'Critical') ? 'danger' : p.risk_level === 'Medium' ? 'warning' : 'neutral'} 
+                                intent={(() => {
+                                    const r = (p.risk_level || '').toLowerCase();
+                                    return (r === 'high' || r === 'critical') ? 'danger' : r === 'medium' ? 'warning' : r === 'low' ? 'info' : 'neutral';
+                                })()} 
                             />
                          </td>
                       </tr>

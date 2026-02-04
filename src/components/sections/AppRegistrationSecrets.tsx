@@ -26,7 +26,7 @@ const columns: ColumnDef<AppRegistrationCredential, unknown>[] = [
     accessorKey: 'Status', header: 'Status',
     cell: ({ getValue }) => {
         const v = (getValue() as string)?.toLowerCase();
-        const intent = v === 'expired' ? 'danger' : v === 'expiring' ? 'warning' : 'success';
+        const intent = v === 'expired' ? 'danger' : (v === 'expiring' || v === 'expiringsoon') ? 'warning' : 'success';
         return <StatusPill label={String(getValue() ?? '')} intent={intent} />;
     },
   },

@@ -148,11 +148,27 @@ export default function DataTable<T>({
         </table>
       </div>
       
-      {table.getPageCount() > 1 && (
+      {(table.getPageCount() > 1 || data.length > 10) && (
         <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100 bg-gray-50/50">
-          <div className="text-xs text-gray-500">
-            Page <span className="font-medium text-gray-900">{table.getState().pagination.pageIndex + 1}</span> of <span className="font-medium text-gray-900">{table.getPageCount()}</span>
+          <div className="flex items-center gap-4">
+            <div className="text-xs text-gray-500">
+              Page <span className="font-medium text-gray-900">{table.getState().pagination.pageIndex + 1}</span> of <span className="font-medium text-gray-900">{table.getPageCount()}</span>
+            </div>
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={e => {
+                table.setPageSize(Number(e.target.value))
+              }}
+              className="bg-white border border-gray-200 text-gray-600 text-xs rounded py-1 pl-2 pr-6 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+            >
+              {[10, 25, 50, 100].map(pageSize => (
+                <option key={pageSize} value={pageSize}>
+                  Show {pageSize}
+                </option>
+              ))}
+            </select>
           </div>
+
           <div className="flex gap-2">
             <button
               onClick={() => table.previousPage()}
