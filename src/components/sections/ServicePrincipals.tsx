@@ -124,21 +124,35 @@ export default function ServicePrincipals({ data }: { data: ServicePrincipalsDat
         columns={columns} 
         data={filteredApps} 
         renderSubComponent={({ row }) => (
-          <div className="space-y-4">
-            <h4 className="font-semibold text-sm uppercase text-gray-500">Permissions</h4>
+          <div className="pl-4 pr-2 py-2">
+            <h4 className="font-semibold text-xs uppercase text-gray-500 mb-2 tracking-wider">Assigned Permissions</h4>
             {row.permissions && row.permissions.length > 0 ? (
-              <div className="grid gap-2">
-                {row.permissions.map((p, i) => (
-                  <div key={i} className="bg-white border p-3 rounded text-sm grid grid-cols-2 gap-2">
-                     <div><span className="text-xs text-gray-500 uppercase">Permission:</span> {p.permission}</div>
-                     <div><span className="text-xs text-gray-500 uppercase">Resource:</span> {p.resource}</div>
-                     <div><span className="text-xs text-gray-500 uppercase">Type:</span> {p.consent_type}</div>
-                     <div>
-                        <span className="text-xs text-gray-500 uppercase block mb-1">Risk:</span> 
-                        <StatusPill label={p.risk_level ?? ''} intent={p.risk_level === 'High' ? 'danger' : 'neutral'} />
-                     </div>
-                  </div>
-                ))}
+              <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Permission</th>
+                      <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Resource</th>
+                      <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                      <th scope="col" className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Risk</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {row.permissions.map((p, i) => (
+                      <tr key={i} className="hover:bg-gray-50 transition-colors">
+                         <td className="px-4 py-2 text-sm font-medium text-gray-900">{p.permission}</td>
+                         <td className="px-4 py-2 text-sm text-gray-500">{p.resource}</td>
+                         <td className="px-4 py-2 text-sm text-gray-500">{p.consent_type}</td>
+                         <td className="px-4 py-2 text-sm">
+                            <StatusPill 
+                                label={p.risk_level || 'None'} 
+                                intent={(p.risk_level === 'High' || p.risk_level === 'Critical') ? 'danger' : p.risk_level === 'Medium' ? 'warning' : 'neutral'} 
+                            />
+                         </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : (
               <p className="text-sm text-gray-400 italic">No specific permissions listed.</p>

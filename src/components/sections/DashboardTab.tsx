@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   Shield, 
   Smartphone, 
@@ -5,13 +6,19 @@ import {
   Monitor,
   AlertTriangle,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+  Globe,
+  MapPin,
+  Mail
 } from 'lucide-react';
 import type { ProcessedReport } from '../../processing/types';
 import type { TabId } from '../layout/Sidebar';
 import ExpandableStatCard from '../common/ExpandableStatCard';
 import SecurityScores from './SecurityScores';
 import Misconfigurations from './Misconfigurations';
+import LicenseOverview from './LicenseOverview';
 import { pct } from '../../utils/format';
 
 interface DashboardTabProps {
@@ -53,6 +60,7 @@ function AlertBanner({
 }
 
 export default function DashboardTab({ data, onTabChange }: DashboardTabProps) {
+  const [isTenantInfoExpanded, setIsTenantInfoExpanded] = useState(false);
   // --- Data Preparation ---
   const scoreTrend = data.security?.trend_percentage_change;
   const scoreHistoryLabels = data.security?.history.map(h => h.date.split(' ')[0]) ?? [];
@@ -84,6 +92,19 @@ export default function DashboardTab({ data, onTabChange }: DashboardTabProps) {
               />
           );
       }
+  }
+
+  // 1b. Inbox Forwarding Rules
+  if (data.inboxRules && data.inboxRules.summary.enabled_external_forwards > 0) {
+      alerts.push(
+          <AlertBanner
+              key="inbox-rules-external"
+              title="External Forwarding Rules Detected"
+              message={`${data.inboxRules.summary.enabled_external_forwards} active inbox rules are forwarding emails to external domains. Review immediately.`}
+              intent="danger"
+              onClick={() => navigateTo('exchange', 'inbox-rules')}
+          />
+      );
   }
 
   // 2. App Registration Secrets
@@ -169,36 +190,6 @@ export default function DashboardTab({ data, onTabChange }: DashboardTabProps) {
       <div id="tenant-overview" className="space-y-6">
         <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Tenant Overview</h3>
         
-        {/* Basic Info Card */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="flex items-start gap-3">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase">Tenant Name</p>
-                <p className="text-sm font-bold text-gray-900 break-all">{data.tenant.organization_name}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase">Tenant ID</p>
-                <p className="text-sm font-bold text-gray-900 break-all">{data.tenant.tenant_id}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase">Created Date</p>
-                <p className="text-sm font-bold text-gray-900 break-all">{data.tenant.created_date}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase">Primary Domain</p>
-                <p className="text-sm font-bold text-gray-900 break-all">{data.tenant.primary_domain}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Key Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {data.security && (
@@ -275,6 +266,109 @@ export default function DashboardTab({ data, onTabChange }: DashboardTabProps) {
           </ExpandableStatCard>
         </div>
 
+        {/* Basic Info Card (Expandable) */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div 
+            className="p-4 cursor-pointer hover:bg-gray-50 transition-colors flex items-center justify-between"
+            onClick={() => setIsTenantInfoExpanded(!isTenantInfoExpanded)}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 flex-1">
+              <div className="flex items-start gap-3">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Tenant Name</p>
+                  <p className="text-sm font-bold text-gray-900 break-all">{data.tenant.organization_name}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Tenant ID</p>
+                  <p className="text-sm font-bold text-gray-900 break-all">{data.tenant.tenant_id}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Created Date</p>
+                  <p className="text-sm font-bold text-gray-900 break-all">{data.tenant.created_date}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase">Primary Domain</p>
+                  <p className="text-sm font-bold text-gray-900 break-all">{data.tenant.primary_domain}</p>
+                </div>
+              </div>
+            </div>
+             <div className="ml-4 text-gray-400">
+                 {isTenantInfoExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+             </div>
+          </div>
+          
+          {isTenantInfoExpanded && (
+             <div className="border-t border-gray-200 p-6 bg-gray-50/50 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   {/* Location Info */}
+                   <div>
+                      <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-3">
+                        <MapPin size={16} className="text-indigo-600" /> Location Details
+                      </h4>
+                      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <dt className="text-gray-500">Country:</dt>
+                        <dd className="font-medium text-gray-900">{data.tenant.country_code || '-'}</dd>
+                        
+                        <dt className="text-gray-500">State/Province:</dt>
+                        <dd className="font-medium text-gray-900">{data.tenant.state || '-'}</dd>
+                        
+                        <dt className="text-gray-500">City:</dt>
+                        <dd className="font-medium text-gray-900">{data.tenant.city || '-'}</dd>
+
+                        <dt className="text-gray-500">Postal Code:</dt>
+                        <dd className="font-medium text-gray-900">{data.tenant.postal_code || '-'}</dd>
+
+                        <dt className="text-gray-500">Language:</dt>
+                        <dd className="font-medium text-gray-900">{data.tenant.preferred_language || '-'}</dd>
+                      </dl>
+                   </div>
+
+                   {/* Technical Contacts */}
+                   <div>
+                      <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-3">
+                        <Mail size={16} className="text-indigo-600" /> Technical Notification Emails
+                      </h4>
+                      {data.tenant.technical_notification_mails && data.tenant.technical_notification_mails.length > 0 ? (
+                        <ul className="space-y-1">
+                          {data.tenant.technical_notification_mails.map((email, idx) => (
+                             <li key={idx} className="text-sm text-gray-700 bg-white border border-gray-200 rounded px-2 py-1 inline-block mr-2 mb-1">
+                               {email}
+                             </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic">No technical notification emails configured.</p>
+                      )}
+                   </div>
+                </div>
+
+                {/* Domains List */}
+                {data.domains && (
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-3">
+                       <Globe size={16} className="text-indigo-600" /> Verified Domains ({data.domains.length})
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                       {data.domains.map((d, i) => (
+                         <div key={i} className={`text-xs border rounded-full px-3 py-1 flex items-center gap-2 ${d.is_default ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium' : 'bg-white border-gray-200 text-gray-600'}`}>
+                            {d.domain}
+                            {d.is_default && <span className="bg-indigo-200 text-indigo-800 text-[10px] px-1 rounded">Default</span>}
+                            {d.is_initial && <span className="bg-gray-100 text-gray-600 text-[10px] px-1 rounded">Initial</span>}
+                         </div>
+                       ))}
+                    </div>
+                  </div>
+                )}
+             </div>
+          )}
+        </div>
+
         {/* Actionable Alerts */}
         {alerts.length > 0 && (
             <div className="space-y-3">
@@ -297,6 +391,13 @@ export default function DashboardTab({ data, onTabChange }: DashboardTabProps) {
         historyLabels={scoreHistoryLabels}
         historyValues={scoreHistoryValues}
       />
+      )}
+
+      {data.licenses && (
+        <div id="license-overview" className="space-y-4">
+          <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">License Overview</h3>
+          <LicenseOverview data={data.licenses} />
+        </div>
       )}
     </div>
   );

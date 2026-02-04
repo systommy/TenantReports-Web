@@ -6,6 +6,12 @@ export interface TenantOverview {
   tenant_id: string
   created_date: string
   total_devices: number
+  technical_notification_mails: string[]
+  country_code?: string
+  state?: string
+  city?: string
+  postal_code?: string
+  preferred_language?: string
 }
 
 export interface Domain {
@@ -201,6 +207,30 @@ export interface AppRegistrationData {
   credentials: AppRegistrationCredential[]
 }
 
+export interface InboxForwardingRule {
+  mailbox_upn: string;
+  mailbox_display: string;
+  rule_name: string;
+  rule_enabled: boolean;
+  forward_type: string;
+  forward_target: string;
+  target_domain: string;
+  rule_priority: number;
+  rule_description: string;
+}
+
+export interface InboxForwardingRules {
+  summary: {
+    total_mailboxes_checked: number;
+    total_rules_checked: number;
+    external_forwards_found: number;
+    enabled_external_forwards: number;
+    mailboxes_with_forwards: number;
+    external_domains: string[] | null;
+  }
+  rules: InboxForwardingRule[];
+}
+
 export interface SharedMailbox {
   display_name: string
   upn: string
@@ -226,6 +256,7 @@ export interface ProcessedReport {
   defender: DefenderSummary | null
   mailbox: PermissionsSummary | null
   calendar: PermissionsSummary | null
+  inboxRules: InboxForwardingRules | null
   audit: AuditEvents | null
   riskyUsers: RiskyUser[] | null
   compliance: ComplianceOverview | null

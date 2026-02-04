@@ -22,6 +22,12 @@ export function processTenantOverview(data: Record<string, unknown>): TenantOver
     tenant_id: (summary.TenantId as string) ?? '',
     created_date: formatDate(summary.CreatedDateTime as string | null),
     total_devices: (directoryStats.TotalDevices as number) ?? 0,
+    technical_notification_mails: Array.isArray(summary.TechnicalNotificationMails) ? summary.TechnicalNotificationMails as string[] : [],
+    country_code: (summary.CountryLetterCode as string) ?? undefined,
+    state: (summary.State as string) ?? undefined,
+    city: (summary.City as string) ?? undefined,
+    postal_code: (summary.PostalCode as string) ?? undefined,
+    preferred_language: (summary.PreferredLanguage as string) ?? undefined,
   }
 }
 

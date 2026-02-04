@@ -10,7 +10,6 @@ import IdentityAccessTab from './sections/IdentityAccessTab'
 import EndpointTab from './sections/EndpointTab'
 import ExchangeTab from './sections/ExchangeTab'
 import SecurityOpsTab from './sections/SecurityOpsTab'
-import LicensingTab from './sections/LicensingTab'
 import AuditLogsTab from './sections/AuditLogsTab'
 
 export default function ReportViewer({ rawData, onReset }: { rawData: Record<string, unknown>; onReset: () => void }) {
@@ -68,7 +67,6 @@ export default function ReportViewer({ rawData, onReset }: { rawData: Record<str
       case 'endpoints': return <EndpointTab data={report} />
       case 'exchange': return <ExchangeTab data={report} />
       case 'security': return <SecurityOpsTab data={report} />
-      case 'licensing': return <LicensingTab data={report} />
       case 'audit': return <AuditLogsTab data={report} />
       default: return <div>Select a tab</div>
     }
@@ -98,7 +96,7 @@ export default function ReportViewer({ rawData, onReset }: { rawData: Record<str
         <div className="print-break"></div>
 
         <div className="print-break-after">
-            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Exchange & Collaboration</h2>
+            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Exchange</h2>
             <ExchangeTab data={report} />
         </div>
 
@@ -107,13 +105,6 @@ export default function ReportViewer({ rawData, onReset }: { rawData: Record<str
         <div className="print-break-after">
             <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Security Operations</h2>
             <SecurityOpsTab data={report} />
-        </div>
-
-        <div className="print-break"></div>
-
-        <div className="print-break-after">
-            <h2 className="text-2xl font-bold mb-4 pb-2 border-b-2 border-indigo-600 text-indigo-900">Licensing</h2>
-            <LicensingTab data={report} />
         </div>
 
         <div className="print-break"></div>

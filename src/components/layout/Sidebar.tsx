@@ -6,13 +6,12 @@ import {
   Users, 
   Smartphone,
   Mail,
-  Settings,
   Activity,
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
 
-export type TabId = 'dashboard' | 'identity' | 'endpoints' | 'exchange' | 'security' | 'licensing' | 'audit';
+export type TabId = 'dashboard' | 'identity' | 'endpoints' | 'exchange' | 'security' | 'audit';
 
 interface SidebarProps {
   activeTab: TabId;
@@ -100,6 +99,7 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
       { id: 'misconfigurations', label: 'Common Misconfigurations', visible: !!report.configuration },
       { id: 'ms365-secure-score', label: 'MS365 Secure Score', visible: !!report.security?.current_score },
       { id: 'azure-secure-score', label: 'Azure Secure Score', visible: !!report.security?.azure_score },
+      { id: 'license-overview', label: 'License Overview', visible: !!report.licenses },
     ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
     
     identity: [
@@ -120,6 +120,7 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
       { id: 'mailbox-permissions', label: 'Mailbox Permissions', visible: !!report.mailbox },
       { id: 'calendar-permissions', label: 'Calendar Permissions', visible: !!report.calendar },
       { id: 'shared-mailboxes', label: 'Shared Mailbox Compliance', visible: !!report.sharedMailboxes },
+      { id: 'inbox-rules', label: 'Inbox Forwarding Rules', visible: !!report.inboxRules },
     ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
     
     security: [
@@ -129,10 +130,6 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
       { id: 'pim-activations', label: 'PIM Activations', visible: !!report.privileged?.activations?.length },
     ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
     
-    licensing: [
-      { id: 'license-overview', label: 'License Overview', visible: !!report.licenses },
-    ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
-
     audit: [
       { id: 'user-modifications', label: 'User Modifications', visible: !!report.audit?.user_events },
       { id: 'group-modifications', label: 'Group Modifications', visible: !!report.audit?.group_events },
@@ -147,7 +144,6 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
     endpoints: true,
     exchange: true,
     security: true,
-    licensing: true,
     audit: true,
   });
 
@@ -200,7 +196,7 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
         <NavItem 
           id="exchange" 
           icon={Mail} 
-          label="Exchange & Collab" 
+          label="Exchange" 
           isActive={activeTab === 'exchange'} 
           isExpanded={expanded.exchange}
           onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('exchange'); }}
@@ -216,16 +212,6 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
           onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('security'); }}
           onClick={() => onTabChange('security')}
           subsections={sections.security}
-        />
-        <NavItem 
-          id="licensing" 
-          icon={Settings} 
-          label="Licensing" 
-          isActive={activeTab === 'licensing'} 
-          isExpanded={expanded.licensing}
-          onToggleExpand={(e) => { e.stopPropagation(); toggleExpand('licensing'); }}
-          onClick={() => onTabChange('licensing')}
-          subsections={sections.licensing}
         />
         <NavItem 
           id="audit" 

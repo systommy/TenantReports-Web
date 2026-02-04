@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState, useEffect } from 'react'
 import { ms365Schema } from '../schemas/ms365Schema'
 import { FileJson, Github, Globe, UploadCloud, ShieldAlert } from 'lucide-react'
 
@@ -42,19 +42,37 @@ export default function FileUploader({ onData }: Props) {
     }, 50)
   }, [onData])
 
-  const onDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file) handleFile(file)
+  useEffect(() => {
+    const handleWindowDragOver = (e: DragEvent) => {
+      e.preventDefault()
+      setDragging(true)
+    }
+    
+    const handleWindowDragLeave = (e: DragEvent) => {
+      e.preventDefault()
+      // Only set dragging to false if we actually leave the window
+      if (e.relatedTarget === null) {
+        setDragging(false)
+      }
+    }
+    
+    const handleWindowDrop = (e: DragEvent) => {
+      e.preventDefault()
+      setDragging(false)
+      const file = e.dataTransfer?.files[0]
+      if (file) handleFile(file)
+    }
+
+    window.addEventListener('dragover', handleWindowDragOver)
+    window.addEventListener('dragleave', handleWindowDragLeave)
+    window.addEventListener('drop', handleWindowDrop)
+
+    return () => {
+      window.removeEventListener('dragover', handleWindowDragOver)
+      window.removeEventListener('dragleave', handleWindowDragLeave)
+      window.removeEventListener('drop', handleWindowDrop)
+    }
   }, [handleFile])
-
-  const onDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setDragging(true)
-  }, [])
-
-  const onDragLeave = useCallback(() => setDragging(false), [])
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -62,8 +80,20 @@ export default function FileUploader({ onData }: Props) {
   }, [handleFile])
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-6">
-      <div className="max-w-2xl w-full">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-6 relative">
+      {/* Global Drag Overlay */}
+      {dragging && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-indigo-600/20 backdrop-blur-sm border-[6px] border-dashed border-indigo-600 pointer-events-none animate-in fade-in duration-200">
+          <div className="bg-white p-12 rounded-3xl shadow-2xl flex flex-col items-center gap-6 scale-110">
+             <div className="w-24 h-24 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center animate-bounce">
+               <UploadCloud size={48} />
+             </div>
+             <p className="text-3xl font-black text-indigo-900 tracking-tight">Drop it anywhere!</p>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-3xl w-full">
         {/* Header Section */}
         <div className="text-center mb-10 space-y-4">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600 text-white shadow-xl shadow-indigo-200 mb-2">
@@ -99,15 +129,12 @@ export default function FileUploader({ onData }: Props) {
 
         {/* Upload Card */}
         <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 overflow-hidden border border-gray-100">
-          <div className="p-8">
+          <div className="p-10">
             <div
-              onDrop={onDrop}
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
               onClick={() => !isProcessing && inputRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 group ${
+              className={`relative border-2 border-dashed rounded-xl p-20 text-center cursor-pointer transition-all duration-200 group ${
                 dragging 
-                  ? 'border-indigo-500 bg-indigo-50/50' 
+                  ? 'border-indigo-500 bg-indigo-50/50 scale-[0.99]' 
                   : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50/50'
               } ${isProcessing ? 'opacity-50 cursor-wait' : ''}`}
             >
@@ -122,18 +149,18 @@ export default function FileUploader({ onData }: Props) {
               
               {isProcessing ? (
                 <div className="flex flex-col items-center animate-pulse">
-                  <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="text-indigo-900 font-semibold">Processing report data...</p>
+                  <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="text-xl text-indigo-900 font-semibold">Processing report data...</p>
                   <p className="text-sm text-indigo-600 mt-1">This might take a moment</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-200">
-                    <UploadCloud size={32} />
+                <div className="space-y-6">
+                  <div className="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-200 shadow-sm">
+                    <UploadCloud size={40} />
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-gray-900">Drop your JSON report here</p>
-                    <p className="text-sm text-gray-500 mt-1">or click to browse your files</p>
+                    <p className="text-2xl font-bold text-gray-900">Drop your JSON report here</p>
+                    <p className="text-gray-500 mt-2 font-medium">or click to browse your files</p>
                   </div>
                 </div>
               )}

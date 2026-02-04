@@ -2,6 +2,7 @@ import type { ProcessedReport } from '../../processing/types';
 import MailboxPermissions from './MailboxPermissions';
 import CalendarPermissions from './CalendarPermissions';
 import SharedMailboxes from './SharedMailboxes';
+import InboxRules from './InboxRules';
 import { Info } from 'lucide-react';
 
 function EmptyState({ message }: { message: string }) {
@@ -39,6 +40,13 @@ export default function ExchangeTab({ data }: { data: ProcessedReport }) {
             <EmptyState message="No shared mailbox compliance data available." />
           )}
       </div>
+      )}
+
+      {data.inboxRules && (
+        <div id="inbox-rules">
+            <h3 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">Inbox Forwarding Rules</h3>
+            <InboxRules data={data.inboxRules} />
+        </div>
       )}
     </div>
   );

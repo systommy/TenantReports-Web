@@ -9,6 +9,7 @@ import { processServicePrincipals, processAppCredentials } from './servicePrinci
 import { processDefenderIncidents } from './defenderIncidents'
 import { processDefenderSummary } from './defender'
 import { processMailboxPermissions, processCalendarPermissions } from './permissions'
+import { processInboxRules } from './inboxRules'
 import { processAuditEvents } from './audit'
 import { processRiskyUsers } from './riskyUsers'
 import { processComplianceOverview, processDeviceDetails, processSharedMailboxCompliance } from './compliance'
@@ -33,6 +34,7 @@ export function processAll(data: Record<string, unknown>): ProcessedReport {
     defender: processDefenderSummary(data),
     mailbox: processMailboxPermissions(data),
     calendar: processCalendarPermissions(data),
+    inboxRules: processInboxRules(data),
     audit: processAuditEvents(data),
     riskyUsers: processRiskyUsers(data),
     compliance: processComplianceOverview(data),
@@ -53,6 +55,7 @@ export { processServicePrincipals, processAppCredentials } from './servicePrinci
 export { processDefenderIncidents } from './defenderIncidents'
 export { processDefenderSummary } from './defender'
 export { processMailboxPermissions, processCalendarPermissions } from './permissions'
+export { processInboxRules } from './inboxRules'
 export { processAuditEvents } from './audit'
 export { processRiskyUsers } from './riskyUsers'
 export { processComplianceOverview, processDeviceDetails, processSharedMailboxCompliance } from './compliance'

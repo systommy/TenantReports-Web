@@ -8,8 +8,8 @@ function getDict(source: Record<string, unknown>, key: string): Record<string, u
 }
 
 export function processDefenderSummary(data: Record<string, unknown>): DefenderSummary | null {
-  if (!('Defender' in data)) return null
-  const defender = getDict(data, 'Defender')
+  if (!('DefenderEmail' in data)) return null
+  const defender = getDict(data, 'DefenderEmail')
   const summary = getDict(defender, 'Summary')
   const threats = Array.isArray(defender.Threats) ? defender.Threats : []
 
