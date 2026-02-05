@@ -62,7 +62,7 @@ export default function ExpandableStatCard({
             {title}
           </div>
           {children && (
-            <div className={`p-1 rounded-full hover:bg-gray-100 transition-colors ${isOpen ? 'rotate-180' : ''}`}>
+            <div className={`p-1 rounded-full hover:bg-gray-100 transition-colors ${isOpen ? 'rotate-180' : ''} no-export`}>
               <ChevronDown size={16} className="text-gray-400" />
             </div>
           )}

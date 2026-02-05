@@ -63,7 +63,7 @@ export default function DataTable<T>({
         </div>
         
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative group w-full sm:w-64">
+          <div className="relative group w-full sm:w-64 no-export">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-500 transition-colors" size={14} />
             <input 
               type="text" 
@@ -117,7 +117,7 @@ export default function DataTable<T>({
                         {idx === 0 && row.getCanExpand() && (
                           <button
                             onClick={row.getToggleExpandedHandler()}
-                            className="p-0.5 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors"
+                            className="p-0.5 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors no-export"
                           >
                             {row.getIsExpanded() ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                           </button>
@@ -149,7 +149,7 @@ export default function DataTable<T>({
       </div>
       
       {(table.getPageCount() > 1 || data.length > 10) && (
-        <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100 bg-gray-50/50">
+        <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100 bg-gray-50/50 no-export">
           <div className="flex items-center gap-4">
             <div className="text-xs text-gray-500">
               Page <span className="font-medium text-gray-900">{table.getState().pagination.pageIndex + 1}</span> of <span className="font-medium text-gray-900">{table.getPageCount()}</span>
