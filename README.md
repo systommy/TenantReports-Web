@@ -1,6 +1,6 @@
-# SecurityReport-Web 🔐
+# TenantReports-Web
 
-An interactive, client-side React application designed to transform raw MS365 security data (exported via PowerShell) into beautiful, actionable security reports. This project is an add-on to the existing Security Report PowerShell module.
+An interactive, client-side React application that visualizes MS365 tenant data exported by [TenantReports](https://github.com/systommy/TenantReports). All processing happens in the browser — no data leaves the client.
 
 ## 🌟 Features
 
@@ -29,17 +29,12 @@ An interactive, client-side React application designed to transform raw MS365 se
 
 ### Local Development
 
-1. **Navigate to the web project:**
-   ```bash
-   cd security-report-web
-   ```
-
-2. **Install dependencies:**
+1. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. **Start the development server:**
+2. **Start the development server:**
    ```bash
    npm run dev
    ```
@@ -49,9 +44,9 @@ An interactive, client-side React application designed to transform raw MS365 se
 
 ## 🏗️ Build & Deployment
 
-### 1. Configure Custom Subdomain (Option B)
+### 1. Configure Custom Subdomain
 
-Ensure the `security-report-web/public/CNAME` file contains your target subdomain:
+Ensure `public/CNAME` contains your target subdomain:
 ```text
 report.yourcompany.com
 ```
@@ -65,7 +60,6 @@ In your domain provider's DNS settings, add a CNAME record:
 ### 3. Deploy to GitHub Pages
 Whenever you want to publish updates, run:
 ```bash
-cd security-report-web
 npm run deploy
 ```
 *This command will automatically run the build process and push the results to the `gh-pages` branch.*
