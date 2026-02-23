@@ -3,28 +3,22 @@ import type { DefenderIncidents } from './types'
 
 export function processDefenderIncidents(data: Record<string, unknown>): DefenderIncidents | null {
   if (!('DefenderIncidents' in data)) return null
-  const incidentsData = data.DefenderIncidents ?? {}
-  let incidents: unknown[]
-  if (typeof incidentsData === 'object' && incidentsData !== null && !Array.isArray(incidentsData)) {
-    const sd = incidentsData as Record<string, unknown>
-    incidents = Array.isArray(sd.Incidents) ? sd.Incidents : []
-  } else {
-    incidents = Array.isArray(incidentsData) ? incidentsData : []
-  }
-
+  const dData = data.DefenderIncidents as Record<string, unknown>
+  
+  const incidentsRaw = Array.isArray(dData.Incidents) ? dData.Incidents : []
+  const summary = dData.Summary as Record<string, unknown> || {}
+  
   const rows: DefenderIncidents['incidents'] = []
   const bySeverity: Record<string, number> = {}
   const byStatus: Record<string, number> = {}
 
-  for (const incident of incidents) {
+  // Process raw incidents
+  for (const incident of incidentsRaw) {
     if (typeof incident !== 'object' || incident === null || Array.isArray(incident)) continue
     const inc = incident as Record<string, unknown>
 
     const severity = (inc.Severity as string) || 'Unknown'
     const status = (inc.Status as string) || 'Unknown'
-
-    bySeverity[severity] = (bySeverity[severity] ?? 0) + 1
-    byStatus[status] = (byStatus[status] ?? 0) + 1
 
     rows.push({
       created: formatDate((inc.CreatedDateTime as string) || (inc.CreatedTime as string) || null),
@@ -33,9 +27,33 @@ export function processDefenderIncidents(data: Record<string, unknown>): Defende
       severity,
       status,
       classification: (inc.Classification as string) ?? null,
+      determination: (inc.Determination as string) ?? null,
+      url: (inc.IncidentUrl as string) ?? null,
       comments: (inc.Comments as string) ?? '',
     })
   }
 
-  return { incidents: rows, by_severity: bySeverity, by_status: byStatus, total: rows.length }
+  // Use summary data for charts if available, otherwise aggregate from rows
+  if (Array.isArray(summary.BySeverity)) {
+    summary.BySeverity.forEach((item: any) => {
+      Object.entries(item).forEach(([k, v]) => { bySeverity[k] = v as number })
+    })
+  } else {
+    rows.forEach(r => { bySeverity[r.severity] = (bySeverity[r.severity] ?? 0) + 1 })
+  }
+
+  if (Array.isArray(summary.ByStatus)) {
+    summary.ByStatus.forEach((item: any) => {
+      Object.entries(item).forEach(([k, v]) => { byStatus[k] = v as number })
+    })
+  } else {
+    rows.forEach(r => { byStatus[r.status] = (byStatus[r.status] ?? 0) + 1 })
+  }
+
+  return { 
+    incidents: rows, 
+    by_severity: bySeverity, 
+    by_status: byStatus, 
+    total: (summary.TotalIncidents as number) ?? rows.length 
+  }
 }

@@ -124,10 +124,10 @@ export default function Sidebar({ activeTab, onTabChange, report }: SidebarProps
     ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
     
     security: [
-      { id: 'privileged-access', label: 'Privileged Access', visible: !!report.privileged },
-      { id: 'defender-incidents', label: 'Defender Incidents', visible: !!report.defenderIncidents },
-      { id: 'microsoft-defender', label: 'Microsoft Defender', visible: !!report.defender },
-      { id: 'pim-activations', label: 'PIM Activations', visible: !!report.privileged?.activations?.length },
+      { id: 'defender-incidents', label: 'Defender - Incidents', visible: !!report.defenderIncidents },
+      { id: 'defender-email', label: 'Defender - Email Alerts', visible: !!report.defender },
+      { id: 'privileged-access', label: 'Privileged Roles - Assignments', visible: !!report.privileged },
+      { id: 'pim-activations', label: 'Privileged Roles - PIM', visible: !!report.privileged?.activations?.length },
     ].filter(s => s.visible).map(({ id, label }) => ({ id, label })),
     
     audit: [

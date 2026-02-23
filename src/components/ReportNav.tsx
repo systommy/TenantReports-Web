@@ -23,7 +23,7 @@ export default function ReportNav({ report }: { report: ProcessedReport }) {
       'tenant-overview', 'user-metrics', 'compliance-overview', 'security-scores',
       'mfa-coverage', 'license-overview', 'expiring-credentials', 'conditional-access',
       'apple-mdm', 'service-principals', 'privileged-access', 'sentinel-incidents',
-      'defender-summary', 'risky-users', 'mailbox-permissions', 'calendar-permissions',
+      'defender-incidents', 'defender-email', 'risky-users', 'mailbox-permissions', 'calendar-permissions',
       'audit-events'
     ]
     
@@ -50,9 +50,10 @@ export default function ReportNav({ report }: { report: ProcessedReport }) {
     { id: 'apple-mdm', label: 'Apple MDM', visible: report.appleMdm !== null },
     { id: 'app-registration-secrets', label: 'App Secrets', visible: report.appCredentials !== null },
     { id: 'service-principals', label: 'Service Principals', visible: report.servicePrincipals !== null },
-    { id: 'privileged-access', label: 'Privileged Access', visible: report.privileged !== null },
-    { id: 'defender-incidents', label: 'Defender Incidents', visible: report.defenderIncidents !== null },
-    { id: 'defender-summary', label: 'Defender', visible: report.defender !== null },
+    { id: 'defender-incidents', label: 'Incidents', visible: report.defenderIncidents !== null },
+    { id: 'defender-email', label: 'Email Alerts', visible: report.defender !== null },
+    { id: 'privileged-access', label: 'Assignments', visible: report.privileged !== null },
+    { id: 'pim-activations', label: 'PIM', visible: (report.privileged?.activations?.length ?? 0) > 0 },
     { id: 'risky-users', label: 'Risky Users', visible: report.riskyUsers !== null },
     { id: 'mailbox-permissions', label: 'Mailbox Perms', visible: report.mailbox !== null },
     { id: 'calendar-permissions', label: 'Calendar Perms', visible: report.calendar !== null },

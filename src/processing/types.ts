@@ -126,15 +126,41 @@ export interface ServicePrincipals {
 }
 
 export interface DefenderIncidents {
-  incidents: { created: string; incident_id: string; title: string | null; severity: string; status: string; classification: string | null; comments: string }[]
+  incidents: { 
+    created: string; 
+    incident_id: string; 
+    title: string | null; 
+    severity: string; 
+    status: string; 
+    classification: string | null; 
+    determination: string | null;
+    url: string | null;
+    comments: string 
+  }[]
   by_severity: Record<string, number>
   by_status: Record<string, number>
   total: number
 }
 
+export interface DefenderEmailIncident {
+  id: string;
+  title: string | null;
+  category: string | null;
+  severity: string | null;
+  status: string | null;
+  description: string | null;
+  assigned_to: string | null;
+  created: string;
+  affected_users: string | null;
+  user_count: number;
+  url: string | null;
+}
+
 export interface DefenderSummary {
   summary: Record<string, unknown>
-  threats: { name: string | null; severity: string | null; category: string | null; detected: string }[]
+  alerts: DefenderEmailIncident[]
+  by_severity: Record<string, number>
+  by_status: Record<string, number>
 }
 
 export interface PermissionsSummary {
@@ -163,6 +189,15 @@ export interface PrivilegedRoles {
   assignments: { role: string; principal: string | null; type: string | null; principal_type: string }[]
   activations: { timestamp: string; activity: string | null; initiated_by: string | null; target_role: string | null; target_user: string | null; result: string | null; reason: string | null }[]
   summary: { total: number; global_admins: number; pim_active_assignments?: number; pim_eligible_assignments?: number; pim_total_assignments?: number }
+  pim_summary: {
+    total_assignments: number;
+    eligible_assignments: number;
+    active_assignments: number;
+    unique_eligible_users: number;
+    eligible_global_admins: number;
+    active_global_admins: number;
+  } | null;
+  assignments_by_role: { role: string; eligible: number; active: number }[];
   by_principal_type: Record<string, number>
 }
 

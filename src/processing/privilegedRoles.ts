@@ -77,22 +77,49 @@ export function processPrivilegedRoles(data: Record<string, unknown>): Privilege
     })
   }
 
-  const pimSummary = getDict(pimData, 'Summary')
+  const pimSummaryRaw = getDict(pimData, 'Summary')
+  let pimSummary: PrivilegedRoles['pim_summary'] = null
+  if (Object.keys(pimSummaryRaw).length > 0) {
+    pimSummary = {
+      total_assignments: (pimSummaryRaw.TotalPIMAssignments as number) ?? 0,
+      eligible_assignments: (pimSummaryRaw.PIMEligibleAssignments as number) ?? 0,
+      active_assignments: (pimSummaryRaw.PIMActiveAssignments as number) ?? 0,
+      unique_eligible_users: (pimSummaryRaw.UniqueEligibleUsers as number) ?? 0,
+      eligible_global_admins: (pimSummaryRaw.EligibleGlobalAdministrators as number) ?? 0,
+      active_global_admins: (pimSummaryRaw.ActiveGlobalAdministrators as number) ?? 0,
+    }
+  }
+
+  const assignmentsByRole: PrivilegedRoles['assignments_by_role'] = []
+  if (Array.isArray(pimData.AssignmentsByRole)) {
+    for (const item of pimData.AssignmentsByRole) {
+      if (typeof item === 'object' && item !== null) {
+        const i = item as Record<string, unknown>
+        assignmentsByRole.push({
+          role: (i.RoleName as string) ?? 'Unknown',
+          eligible: (i.EligibleCount as number) ?? 0,
+          active: (i.ActiveCount as number) ?? 0,
+        })
+      }
+    }
+  }
 
   const summaryResult: PrivilegedRoles['summary'] = {
     total: rows.length,
     global_admins: globalAdminCount,
   }
-  if (Object.keys(pimSummary).length > 0) {
-    summaryResult.pim_active_assignments = (pimSummary.PIMActiveAssignments as number) ?? 0
-    summaryResult.pim_eligible_assignments = (pimSummary.PIMEligibleAssignments as number) ?? 0
-    summaryResult.pim_total_assignments = (pimSummary.TotalPIMAssignments as number) ?? 0
+  if (Object.keys(pimSummaryRaw).length > 0) {
+    summaryResult.pim_active_assignments = (pimSummaryRaw.PIMActiveAssignments as number) ?? 0
+    summaryResult.pim_eligible_assignments = (pimSummaryRaw.PIMEligibleAssignments as number) ?? 0
+    summaryResult.pim_total_assignments = (pimSummaryRaw.TotalPIMAssignments as number) ?? 0
   }
 
   return {
     assignments: rows,
     activations: activationRows,
     summary: summaryResult,
+    pim_summary: pimSummary,
+    assignments_by_role: assignmentsByRole,
     by_principal_type: principalTypeCounts,
   }
 }

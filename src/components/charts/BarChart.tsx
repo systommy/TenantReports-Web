@@ -18,7 +18,7 @@ const COLORS = [
 
 interface Props {
   labels: string[]
-  datasets: { label: string; values: number[] }[]
+  datasets: { label: string; values: number[]; backgroundColor?: string | string[] }[]
   title?: string
   horizontal?: boolean
 }
@@ -34,9 +34,9 @@ export default function BarChart({ labels, datasets, title, horizontal = false }
             datasets: datasets.map((ds, i) => ({
               label: ds.label,
               data: ds.values,
-              backgroundColor: datasets.length === 1 
+              backgroundColor: ds.backgroundColor ?? (datasets.length === 1 
                 ? labels.map((_, j) => COLORS[j % COLORS.length]) 
-                : COLORS[i % COLORS.length],
+                : COLORS[i % COLORS.length]),
               borderRadius: 4, // Add slight rounding for better visuals
             })),
           }}
